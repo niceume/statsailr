@@ -1,0 +1,5 @@
+READ builtin="mtcars"
+
+PROC CAT data=mtcars
+  crosstable cyl carb /  missing.include = T
+END

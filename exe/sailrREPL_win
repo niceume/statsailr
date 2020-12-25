@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require("statsailr")
+
+reader, writer = IO.pipe
+
+server_thread = StatSailr::Service.start_win_thread( reader , writer)
+
+prompt = "(^^)v: "
+line = ""
+print prompt
+while true
+  line = gets()
+  if line.nil? # When C-d
+    puts "C-d : Parent process finishes. Close pipe."
+    writer.close
+    break
+  elsif line =~ /^!exit/
+    puts "!exit : Parent process finishes. Close pipe."
+    writer.close
+    break
+  else
+    writer.write line
+    print prompt
+  end
+end
+
+server_thread.join()
+

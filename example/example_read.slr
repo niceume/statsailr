@@ -1,0 +1,10 @@
+// comment
+/*
+ multipe line comments 
+*/
+
+Read builtin = "mtcars"
+
+READ file = "./iris.csv" as = iris_csv  sep = "," 
+
+

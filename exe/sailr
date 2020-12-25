@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+raise "Please spcify StatSailr script path" if( ARGV[0].nil? )
+
+$script_file_path = Dir.pwd + "/" + ARGV[0]
+
+raise "StatSailr script file specified does not exist" if ! File.exist?( $script_file_path )
+
+$script_dir_path = File.dirname( $script_file_path )
+
+require("statsailr")
+
+StatSailr.run()
+
+# In the future, create StatSailr gem & load script file there.
+# Currently, everything exists in the same directory.
+# load( __dir__ + "/" + "sts_build.rb")  # __dir__ = Direcotry of THIS file.
+

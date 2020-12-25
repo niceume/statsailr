@@ -1,0 +1,129 @@
+class STSParser
+
+token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_MULT P_PLUS P_MINUS P_HAT P_IN P_PERC P_TILDA P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA SEP_SLASH 
+
+rule
+
+program : opt_termins blocks opt_termins  {result = val[1]}
+
+blocks: blocks TERMIN block  { val[0] << val[2] ; result = val[0]}
+      | block                { result = Array.new(1, val[0] )}
+
+block: top_stmt    { result = val[0] }
+     | data_block  { result = val[0] }
+     | proc_block  { result = val[0] }
+
+top_stmt: TOP_INST top_options TOP_INST_END  {result = GramNode.new( :TOP_BLOCK,  val[0], val[1] ) }
+
+data_block: DATA_START data_engine_option IDENT data_options TERMIN DATA_SCRIPT DATA_END  { val[1] ; result = GramNode.new( :DATA_BLOCK, GramNode.new(:ident, val[2]), val[3], GramNode.new( :string, val[5])) }
+
+proc_block: PROC_START IDENT proc_options TERMIN proc_stmts TERMIN PROC_END  { result = GramNode.new( :PROC_BLOCK, GramNode.new(:ident, val[1]), val[2], val[4]) }
+
+top_options :                           { result = nil }
+            | value_or_kv               { result = Array.new(1, val[0]) }
+            | top_options value_or_kv   { val[0] << val[1]; result = val[0]}
+
+value_or_kv: opt_primary  {result = val[0]}
+           | kv           {result = val[0]}
+
+data_engine_option :             { result = nil }
+                   | COLON IDENT { result = val[1]}
+
+data_options :            {result = nil}
+             | options    {result = val[0]}
+
+proc_options :            {result = nil}
+             | options    {result = val[0]}
+
+options: options  key_or_kv  { val[0] << val[1]; result = val[0]}
+       | key_or_kv           { result = Array.new(1, val[0]) }
+
+key_or_kv: key {result = val[0] }
+         | kv  {result = val[0] }
+
+key: IDENT  { result = GramNode.new(:option, val[0], true ) }
+
+kv : IDENT ASSIGN opt_primary  { result = GramNode.new(:option, val[0], val[2]) }
+
+opt_primary : NUMBER  { result = GramNode.new(:num   , val[0]) }
+            | STRING  { result = GramNode.new(:string, val[0]) }
+            | IDENT   { result = GramNode.new(:ident , val[0]) }
+
+proc_stmts : proc_stmts TERMIN proc_stmt { val[0] << val[2]; result = val[0] }
+           | proc_stmt                   { result = Array.new(1, val[0]) }
+
+proc_stmt  : PROC_INST optional_proc_stmt_options { result = GramNode.new( :proc_stmt , GramNode.new(:ident, val[0]) , val[1]) }
+
+optional_proc_stmt_options :                      {result = nil    }
+                           | proc_stmt_options    {result = val[0] }
+
+proc_stmt_options : proc_stmt_options proc_primary  { val[0] << val[1] ; result = val[0] }
+                  | proc_primary                    { result = Array.new(1, val[0] ) }
+
+proc_primary : IDENT   { result = GramNode.new(:ident , val[0]) }
+             | NUMBER  { result = GramNode.new(:num   , val[0]) }
+             | STRING  { result = GramNode.new(:string, val[0]) }
+             | P_EQ    { result = GramNode.new(:sign, val[0]) }
+             | P_MULT  { result = GramNode.new(:sign, val[0]) }
+             | P_PLUS  { result = GramNode.new(:sign, val[0]) }
+             | P_MINUS { result = GramNode.new(:sign, val[0]) }
+             | P_HAT   { result = GramNode.new(:sign, val[0]) }
+             | P_IN    { result = GramNode.new(:sign, val[0]) }
+             | P_PERC  { result = GramNode.new(:sign, val[0]) }
+             | P_TILDA { result = GramNode.new(:sign, val[0]) }
+             | P_COLON { result = GramNode.new(:sign, val[0]) }
+             | P_LPAR  { result = GramNode.new(:sign, val[0]) }
+             | P_RPAR  { result = GramNode.new(:sign, val[0]) }
+             | P_LSQBR  { result = GramNode.new(:sign, val[0]) }
+             | P_RSQBR  { result = GramNode.new(:sign, val[0]) }
+             | P_COMMA  { result = GramNode.new(:sign, val[0]) }
+             | SEP_SLASH { result = GramNode.new(:sign, val[0]) }
+
+opt_termins : # empty 
+            | termins
+
+termins : termins TERMIN
+        | TERMIN
+
+end
+
+---- inner
+
+def parse( tokens )
+  @tokens = tokens
+
+  @yydebug = true
+  do_parse()
+end
+
+def next_token
+  @tokens.shift
+end
+
+def on_error(t, val, vstack)
+  raise Racc::ParseError, sprintf(
+    "Parse error on value %s (%s)\n",
+    val.inspect, token_to_str(t) || '?' )
+end
+
+---- footer
+
+require_relative("sts_gram_node.rb")
+
+module STSParserDriver
+  def self.run( tokens )
+    parser = STSParser.new
+
+    begin
+      gram_tree = parser.parse( tokens )
+    rescue Racc::ParseError => e
+      p "Parser error detected"
+      $stderr.puts e
+    end
+  end
+end
+
+
+
+
+

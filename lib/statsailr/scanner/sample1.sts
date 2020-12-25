@@ -1,0 +1,37 @@
+// comment
+/*
+ multipe line comments 
+*/
+
+LOAD builtin = "mtcars"
+
+DATA new_mtcars set=mtcars
+if(cyl > 4){
+  powerful = 1
+}else{
+  powerful = 0
+}
+END
+
+PROC FREQ data=new_mtcars
+  /* Calculate frequencies & show in list format
+  */
+  tables cyl * powerful // categorize by cyl and powerful
+END
+
+/*
+PROC SAVE data=new_mtcars
+  to "./new_mtcars.RData"
+END
+*/
+
+LOAD csv = "./iris.csv" as = iris  sep = "," head = 1
+
+/*
+PROC GLM data=iris
+  model Speices ~ Sepal.Length Sepal.Width
+  family binomial
+END
+*/
+
+

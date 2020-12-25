@@ -1,0 +1,769 @@
+state 11 contains 3 shift/reduce conflicts
+
+
+-------- Grammar --------
+
+rule 1 program: opt_termins blocks opt_termins
+rule 2 blocks: blocks TERMIN block
+rule 3 blocks: block
+rule 4 block: top_stmt
+rule 5 block: data_block
+rule 6 block: proc_block
+rule 7 top_stmt: TOP_INST top_options TOP_INST_END
+rule 8 data_block: DATA_START IDENT data_options TERMIN DATA_SCRIPT DATA_END
+rule 9 proc_block: PROC_START IDENT proc_options TERMIN proc_stmts TERMIN PROC_END
+rule 10 top_options: 
+rule 11 top_options: value_or_kv
+rule 12 top_options: top_options value_or_kv
+rule 13 value_or_kv: opt_primary
+rule 14 value_or_kv: kv
+rule 15 data_options: 
+rule 16 data_options: options
+rule 17 proc_options: 
+rule 18 proc_options: options
+rule 19 options: options key_or_kv
+rule 20 options: key_or_kv
+rule 21 key_or_kv: key
+rule 22 key_or_kv: kv
+rule 23 key: IDENT
+rule 24 kv: IDENT ASSIGN opt_primary
+rule 25 opt_primary: NUMBER
+rule 26 opt_primary: STRING
+rule 27 opt_primary: IDENT
+rule 28 proc_stmts: proc_stmts TERMIN proc_stmt
+rule 29 proc_stmts: proc_stmt
+rule 30 proc_stmt: PROC_INST optional_proc_stmt_options
+rule 31 optional_proc_stmt_options: 
+rule 32 optional_proc_stmt_options: proc_stmt_options
+rule 33 proc_stmt_options: proc_stmt_options proc_primary
+rule 34 proc_stmt_options: proc_primary
+rule 35 proc_primary: IDENT
+rule 36 proc_primary: NUMBER
+rule 37 proc_primary: STRING
+rule 38 proc_primary: P_EQ
+rule 39 proc_primary: P_MULT
+rule 40 proc_primary: P_PLUS
+rule 41 proc_primary: P_MINUS
+rule 42 proc_primary: P_SLASH
+rule 43 proc_primary: P_HAT
+rule 44 proc_primary: P_IN
+rule 45 proc_primary: P_PERC
+rule 46 proc_primary: P_TILDA
+rule 47 proc_primary: P_COLON
+rule 48 proc_primary: P_LPAR
+rule 49 proc_primary: P_RPAR
+rule 50 opt_termins: 
+rule 51 opt_termins: termins
+rule 52 termins: termins TERMIN
+rule 53 termins: TERMIN
+
+------- Symbols -------
+
+**Nonterminals, with rules where they appear
+
+  $start (27)
+    on right: 
+    on left : 
+  program (28)
+    on right: 
+    on left : 1
+  opt_termins (29)
+    on right: 1
+    on left : 50 51
+  blocks (30)
+    on right: 1 2
+    on left : 2 3
+  block (31)
+    on right: 2 3
+    on left : 4 5 6
+  top_stmt (32)
+    on right: 4
+    on left : 7
+  data_block (33)
+    on right: 5
+    on left : 8
+  proc_block (34)
+    on right: 6
+    on left : 9
+  top_options (35)
+    on right: 7 12
+    on left : 10 11 12
+  data_options (36)
+    on right: 8
+    on left : 15 16
+  proc_options (37)
+    on right: 9
+    on left : 17 18
+  proc_stmts (38)
+    on right: 9 28
+    on left : 28 29
+  value_or_kv (39)
+    on right: 11 12
+    on left : 13 14
+  opt_primary (40)
+    on right: 13 24
+    on left : 25 26 27
+  kv (41)
+    on right: 14 22
+    on left : 24
+  options (42)
+    on right: 16 18 19
+    on left : 19 20
+  key_or_kv (43)
+    on right: 19 20
+    on left : 21 22
+  key (44)
+    on right: 21
+    on left : 23
+  proc_stmt (45)
+    on right: 28 29
+    on left : 30
+  optional_proc_stmt_options (46)
+    on right: 30
+    on left : 31 32
+  proc_stmt_options (47)
+    on right: 32 33
+    on left : 33 34
+  proc_primary (48)
+    on right: 33 34
+    on left : 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49
+  termins (49)
+    on right: 51 52
+    on left : 52 53
+
+**Terminals, with rules where they appear
+
+  $end (0) 
+  error (1) 
+  TOP_INST (2) 7
+  TOP_INST_END (3) 7
+  DATA_START (4) 8
+  DATA_SCRIPT (5) 8
+  DATA_END (6) 8
+  PROC_START (7) 9
+  PROC_INST (8) 30
+  PROC_END (9) 9
+  TERMIN (10) 2 8 9 28 52 53
+  IDENT (11) 8 9 23 24 27 35
+  ASSIGN (12) 24
+  NUMBER (13) 25 36
+  STRING (14) 26 37
+  P_EQ (15) 38
+  P_MULT (16) 39
+  P_PLUS (17) 40
+  P_MINUS (18) 41
+  P_SLASH (19) 42
+  P_HAT (20) 43
+  P_IN (21) 44
+  P_PERC (22) 45
+  P_TILDA (23) 46
+  P_COLON (24) 47
+  P_LPAR (25) 48
+  P_RPAR (26) 49
+
+--------- State ---------
+
+state 0
+
+
+  TERMIN        shift, and go to state 4
+  $default      reduce using rule 50 (opt_termins)
+
+  program       go to state 1
+  opt_termins   go to state 2
+  termins       go to state 3
+
+state 1
+
+
+  $end          shift, and go to state 5
+
+
+state 2
+
+   1) program : opt_termins _ blocks opt_termins
+
+  TOP_INST      shift, and go to state 11
+  DATA_START    shift, and go to state 12
+  PROC_START    shift, and go to state 13
+
+  blocks        go to state 6
+  block         go to state 7
+  top_stmt      go to state 8
+  data_block    go to state 9
+  proc_block    go to state 10
+
+state 3
+
+  51) opt_termins : termins _
+  52) termins : termins _ TERMIN
+
+  TERMIN        shift, and go to state 14
+  $default      reduce using rule 51 (opt_termins)
+
+
+state 4
+
+  53) termins : TERMIN _
+
+  $default      reduce using rule 53 (termins)
+
+
+state 5
+
+
+  $end          shift, and go to state 15
+
+
+state 6
+
+   1) program : opt_termins blocks _ opt_termins
+   2) blocks : blocks _ TERMIN block
+
+  TERMIN        shift, and go to state 17
+  $default      reduce using rule 50 (opt_termins)
+
+  opt_termins   go to state 16
+  termins       go to state 3
+
+state 7
+
+   3) blocks : block _
+
+  $default      reduce using rule 3 (blocks)
+
+
+state 8
+
+   4) block : top_stmt _
+
+  $default      reduce using rule 4 (block)
+
+
+state 9
+
+   5) block : data_block _
+
+  $default      reduce using rule 5 (block)
+
+
+state 10
+
+   6) block : proc_block _
+
+  $default      reduce using rule 6 (block)
+
+
+state 11
+
+   7) top_stmt : TOP_INST _ top_options TOP_INST_END
+
+  IDENT         shift, and go to state 22
+  IDENT         [reduce using rule 10 (top_options)]
+  NUMBER        shift, and go to state 23
+  NUMBER        [reduce using rule 10 (top_options)]
+  STRING        shift, and go to state 24
+  STRING        [reduce using rule 10 (top_options)]
+  $default      reduce using rule 10 (top_options)
+
+  top_options   go to state 18
+  value_or_kv   go to state 19
+  opt_primary   go to state 20
+  kv            go to state 21
+
+state 12
+
+   8) data_block : DATA_START _ IDENT data_options TERMIN DATA_SCRIPT DATA_END
+
+  IDENT         shift, and go to state 25
+
+
+state 13
+
+   9) proc_block : PROC_START _ IDENT proc_options TERMIN proc_stmts TERMIN PROC_END
+
+  IDENT         shift, and go to state 26
+
+
+state 14
+
+  52) termins : termins TERMIN _
+
+  $default      reduce using rule 52 (termins)
+
+
+state 15
+
+
+  $default      accept
+
+
+state 16
+
+   1) program : opt_termins blocks opt_termins _
+
+  $default      reduce using rule 1 (program)
+
+
+state 17
+
+   2) blocks : blocks TERMIN _ block
+  53) termins : TERMIN _
+
+  TOP_INST      shift, and go to state 11
+  DATA_START    shift, and go to state 12
+  PROC_START    shift, and go to state 13
+  $default      reduce using rule 53 (termins)
+
+  block         go to state 27
+  top_stmt      go to state 8
+  data_block    go to state 9
+  proc_block    go to state 10
+
+state 18
+
+   7) top_stmt : TOP_INST top_options _ TOP_INST_END
+  12) top_options : top_options _ value_or_kv
+
+  TOP_INST_END  shift, and go to state 28
+  IDENT         shift, and go to state 22
+  NUMBER        shift, and go to state 23
+  STRING        shift, and go to state 24
+
+  value_or_kv   go to state 29
+  opt_primary   go to state 20
+  kv            go to state 21
+
+state 19
+
+  11) top_options : value_or_kv _
+
+  $default      reduce using rule 11 (top_options)
+
+
+state 20
+
+  13) value_or_kv : opt_primary _
+
+  $default      reduce using rule 13 (value_or_kv)
+
+
+state 21
+
+  14) value_or_kv : kv _
+
+  $default      reduce using rule 14 (value_or_kv)
+
+
+state 22
+
+  24) kv : IDENT _ ASSIGN opt_primary
+  27) opt_primary : IDENT _
+
+  ASSIGN        shift, and go to state 30
+  $default      reduce using rule 27 (opt_primary)
+
+
+state 23
+
+  25) opt_primary : NUMBER _
+
+  $default      reduce using rule 25 (opt_primary)
+
+
+state 24
+
+  26) opt_primary : STRING _
+
+  $default      reduce using rule 26 (opt_primary)
+
+
+state 25
+
+   8) data_block : DATA_START IDENT _ data_options TERMIN DATA_SCRIPT DATA_END
+
+  IDENT         shift, and go to state 36
+  $default      reduce using rule 15 (data_options)
+
+  data_options  go to state 31
+  options       go to state 32
+  key_or_kv     go to state 33
+  key           go to state 34
+  kv            go to state 35
+
+state 26
+
+   9) proc_block : PROC_START IDENT _ proc_options TERMIN proc_stmts TERMIN PROC_END
+
+  IDENT         shift, and go to state 36
+  $default      reduce using rule 17 (proc_options)
+
+  proc_options  go to state 37
+  options       go to state 38
+  key_or_kv     go to state 33
+  key           go to state 34
+  kv            go to state 35
+
+state 27
+
+   2) blocks : blocks TERMIN block _
+
+  $default      reduce using rule 2 (blocks)
+
+
+state 28
+
+   7) top_stmt : TOP_INST top_options TOP_INST_END _
+
+  $default      reduce using rule 7 (top_stmt)
+
+
+state 29
+
+  12) top_options : top_options value_or_kv _
+
+  $default      reduce using rule 12 (top_options)
+
+
+state 30
+
+  24) kv : IDENT ASSIGN _ opt_primary
+
+  IDENT         shift, and go to state 40
+  NUMBER        shift, and go to state 23
+  STRING        shift, and go to state 24
+
+  opt_primary   go to state 39
+
+state 31
+
+   8) data_block : DATA_START IDENT data_options _ TERMIN DATA_SCRIPT DATA_END
+
+  TERMIN        shift, and go to state 41
+
+
+state 32
+
+  16) data_options : options _
+  19) options : options _ key_or_kv
+
+  IDENT         shift, and go to state 36
+  $default      reduce using rule 16 (data_options)
+
+  key_or_kv     go to state 42
+  key           go to state 34
+  kv            go to state 35
+
+state 33
+
+  20) options : key_or_kv _
+
+  $default      reduce using rule 20 (options)
+
+
+state 34
+
+  21) key_or_kv : key _
+
+  $default      reduce using rule 21 (key_or_kv)
+
+
+state 35
+
+  22) key_or_kv : kv _
+
+  $default      reduce using rule 22 (key_or_kv)
+
+
+state 36
+
+  23) key : IDENT _
+  24) kv : IDENT _ ASSIGN opt_primary
+
+  ASSIGN        shift, and go to state 30
+  $default      reduce using rule 23 (key)
+
+
+state 37
+
+   9) proc_block : PROC_START IDENT proc_options _ TERMIN proc_stmts TERMIN PROC_END
+
+  TERMIN        shift, and go to state 43
+
+
+state 38
+
+  18) proc_options : options _
+  19) options : options _ key_or_kv
+
+  IDENT         shift, and go to state 36
+  $default      reduce using rule 18 (proc_options)
+
+  key_or_kv     go to state 42
+  key           go to state 34
+  kv            go to state 35
+
+state 39
+
+  24) kv : IDENT ASSIGN opt_primary _
+
+  $default      reduce using rule 24 (kv)
+
+
+state 40
+
+  27) opt_primary : IDENT _
+
+  $default      reduce using rule 27 (opt_primary)
+
+
+state 41
+
+   8) data_block : DATA_START IDENT data_options TERMIN _ DATA_SCRIPT DATA_END
+
+  DATA_SCRIPT   shift, and go to state 44
+
+
+state 42
+
+  19) options : options key_or_kv _
+
+  $default      reduce using rule 19 (options)
+
+
+state 43
+
+   9) proc_block : PROC_START IDENT proc_options TERMIN _ proc_stmts TERMIN PROC_END
+
+  PROC_INST     shift, and go to state 47
+
+  proc_stmts    go to state 45
+  proc_stmt     go to state 46
+
+state 44
+
+   8) data_block : DATA_START IDENT data_options TERMIN DATA_SCRIPT _ DATA_END
+
+  DATA_END      shift, and go to state 48
+
+
+state 45
+
+   9) proc_block : PROC_START IDENT proc_options TERMIN proc_stmts _ TERMIN PROC_END
+  28) proc_stmts : proc_stmts _ TERMIN proc_stmt
+
+  TERMIN        shift, and go to state 49
+
+
+state 46
+
+  29) proc_stmts : proc_stmt _
+
+  $default      reduce using rule 29 (proc_stmts)
+
+
+state 47
+
+  30) proc_stmt : PROC_INST _ optional_proc_stmt_options
+
+  IDENT         shift, and go to state 53
+  NUMBER        shift, and go to state 54
+  STRING        shift, and go to state 55
+  P_EQ          shift, and go to state 56
+  P_MULT        shift, and go to state 57
+  P_PLUS        shift, and go to state 58
+  P_MINUS       shift, and go to state 59
+  P_SLASH       shift, and go to state 60
+  P_HAT         shift, and go to state 61
+  P_IN          shift, and go to state 62
+  P_PERC        shift, and go to state 63
+  P_TILDA       shift, and go to state 64
+  P_COLON       shift, and go to state 65
+  P_LPAR        shift, and go to state 66
+  P_RPAR        shift, and go to state 67
+  $default      reduce using rule 31 (optional_proc_stmt_options)
+
+  optional_proc_stmt_options  go to state 50
+  proc_stmt_options  go to state 51
+  proc_primary  go to state 52
+
+state 48
+
+   8) data_block : DATA_START IDENT data_options TERMIN DATA_SCRIPT DATA_END _
+
+  $default      reduce using rule 8 (data_block)
+
+
+state 49
+
+   9) proc_block : PROC_START IDENT proc_options TERMIN proc_stmts TERMIN _ PROC_END
+  28) proc_stmts : proc_stmts TERMIN _ proc_stmt
+
+  PROC_INST     shift, and go to state 47
+  PROC_END      shift, and go to state 68
+
+  proc_stmt     go to state 69
+
+state 50
+
+  30) proc_stmt : PROC_INST optional_proc_stmt_options _
+
+  $default      reduce using rule 30 (proc_stmt)
+
+
+state 51
+
+  32) optional_proc_stmt_options : proc_stmt_options _
+  33) proc_stmt_options : proc_stmt_options _ proc_primary
+
+  IDENT         shift, and go to state 53
+  NUMBER        shift, and go to state 54
+  STRING        shift, and go to state 55
+  P_EQ          shift, and go to state 56
+  P_MULT        shift, and go to state 57
+  P_PLUS        shift, and go to state 58
+  P_MINUS       shift, and go to state 59
+  P_SLASH       shift, and go to state 60
+  P_HAT         shift, and go to state 61
+  P_IN          shift, and go to state 62
+  P_PERC        shift, and go to state 63
+  P_TILDA       shift, and go to state 64
+  P_COLON       shift, and go to state 65
+  P_LPAR        shift, and go to state 66
+  P_RPAR        shift, and go to state 67
+  $default      reduce using rule 32 (optional_proc_stmt_options)
+
+  proc_primary  go to state 70
+
+state 52
+
+  34) proc_stmt_options : proc_primary _
+
+  $default      reduce using rule 34 (proc_stmt_options)
+
+
+state 53
+
+  35) proc_primary : IDENT _
+
+  $default      reduce using rule 35 (proc_primary)
+
+
+state 54
+
+  36) proc_primary : NUMBER _
+
+  $default      reduce using rule 36 (proc_primary)
+
+
+state 55
+
+  37) proc_primary : STRING _
+
+  $default      reduce using rule 37 (proc_primary)
+
+
+state 56
+
+  38) proc_primary : P_EQ _
+
+  $default      reduce using rule 38 (proc_primary)
+
+
+state 57
+
+  39) proc_primary : P_MULT _
+
+  $default      reduce using rule 39 (proc_primary)
+
+
+state 58
+
+  40) proc_primary : P_PLUS _
+
+  $default      reduce using rule 40 (proc_primary)
+
+
+state 59
+
+  41) proc_primary : P_MINUS _
+
+  $default      reduce using rule 41 (proc_primary)
+
+
+state 60
+
+  42) proc_primary : P_SLASH _
+
+  $default      reduce using rule 42 (proc_primary)
+
+
+state 61
+
+  43) proc_primary : P_HAT _
+
+  $default      reduce using rule 43 (proc_primary)
+
+
+state 62
+
+  44) proc_primary : P_IN _
+
+  $default      reduce using rule 44 (proc_primary)
+
+
+state 63
+
+  45) proc_primary : P_PERC _
+
+  $default      reduce using rule 45 (proc_primary)
+
+
+state 64
+
+  46) proc_primary : P_TILDA _
+
+  $default      reduce using rule 46 (proc_primary)
+
+
+state 65
+
+  47) proc_primary : P_COLON _
+
+  $default      reduce using rule 47 (proc_primary)
+
+
+state 66
+
+  48) proc_primary : P_LPAR _
+
+  $default      reduce using rule 48 (proc_primary)
+
+
+state 67
+
+  49) proc_primary : P_RPAR _
+
+  $default      reduce using rule 49 (proc_primary)
+
+
+state 68
+
+   9) proc_block : PROC_START IDENT proc_options TERMIN proc_stmts TERMIN PROC_END _
+
+  $default      reduce using rule 9 (proc_block)
+
+
+state 69
+
+  28) proc_stmts : proc_stmts TERMIN proc_stmt _
+
+  $default      reduce using rule 28 (proc_stmts)
+
+
+state 70
+
+  33) proc_stmt_options : proc_stmt_options proc_primary _
+
+  $default      reduce using rule 33 (proc_stmt_options)
+

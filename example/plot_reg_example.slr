@@ -1,0 +1,55 @@
+// comment
+/*
+ multipe line comments 
+*/
+
+READ builtin = "mtcars"
+
+DATA new_mtcars set=mtcars
+if(cyl > 4){
+  powerful = 1
+}else{
+  powerful = 0
+}
+END
+
+PROC PRINT data=new_mtcars
+  head 10
+  tail
+  tail / n = 10
+END
+
+PROC PLOT data=new_mtcars
+  scatter powerful cyl
+  dev.copy png / file = "scatter.png"
+END
+
+PROC CAT data=new_mtcars
+  /* Calculate frequencies & show in list format
+  */
+  xtabs ~ cyl + powerful 
+  fisher.test
+  chisq.test
+END
+
+PROC UNI data=new_mtcars
+  var cyl carb
+END
+
+
+PROC REG data=new_mtcars
+   lm  hp ~ factor(cyl) + factor(carb)
+END
+
+GETWD
+
+SAVE new_mtcars file="./new_mtcars.csv"
+
+SAVE new_mtcars file="./new_mtcars.rda"
+
+
+// READ builtin = "CO2"
+
+// DATA:SQLDF CO2v2 
+//   SELECT Plant, conc, uptake FROM CO2 WHERE Plant IN ('Qn1','Mn1') ORDER BY uptake
+// END
