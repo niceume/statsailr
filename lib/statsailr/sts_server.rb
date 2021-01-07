@@ -2,7 +2,7 @@ require_relative "sts_build_exec.rb"
 
 module StatSailr
   module Service
-    def self.start( reader , writer )
+    def self.start( reader , writer , fork_or_thread: "fork" )
       if $service_started
         puts "StatSailr::Service has already started"
         return false
@@ -10,9 +10,11 @@ module StatSailr
         $service_started = true
       end
 
-      child_pid = fork do
+      child_exec = lambda{
         p self
-        writer.close()  # close child's writer
+        if fork_or_thread == "fork"    
+          writer.close()  # close child's writer
+        end
         script = ""
         block_idx = 1
         @first_time = true
@@ -59,16 +61,23 @@ module StatSailr
           end
         end # end of while
 
-        puts "Finish forked (child) process"
+        puts "Finish child process/thread"
         reader.close()
         puts "Reader pipe closed"
         StatSailr.build_exec( " ", initR_beforeExec: false, endR_afterExec: true ) # stop R
         $service_started = false
         puts "R program finished"
-      end # end of fork
+      } # end of lambda
 
-      reader.close() # close parent's reader
-      return child_pid
+      case fork_or_thread
+      when "fork"
+        child_pid = fork &child_exec
+        reader.close() # close parent's reader
+        return child_pid
+      when "thread"
+        child_thread = Thread.start &child_exec
+        return child_thread
+      end
     end
   end
 end

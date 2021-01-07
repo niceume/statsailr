@@ -1,16 +1,26 @@
 #!/usr/bin/env ruby
 
+## Parse argumnet and initialize setting
+
+fork_or_thread = "fork"
+
+if ARGV.include?("--thread")
+  fork_or_thread = "thread"
+end
+
+## Main
+
 require("statsailr")
 
 reader, writer = IO.pipe
 
-child_pid = StatSailr::Service.start( reader , writer)
+child_service = StatSailr::Service.start( reader , writer, fork_or_thread: fork_or_thread )
 
 prompt = "(^^)v: "
 line = ""
 print prompt
 while true
-  line = gets()
+  line = STDIN.gets()
   if line.nil? # When C-d
     puts "C-d : Parent process finishes. Close pipe."
     writer.close
@@ -25,5 +35,9 @@ while true
   end
 end
 
-Process.waitpid(child_pid)
-
+case fork_or_thread
+when "fork"
+  Process.waitpid(child_service)
+when "thread"
+  child_service.join()
+end

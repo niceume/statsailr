@@ -76,10 +76,9 @@ Not only sailr command, but sailrREPL command is also provided. It enables inter
 $ gem install statsailr
 ```
 
-* Then, 'sailr' and 'sailrREPL' (sailrREPL_win for Windows) become available.
+* Then, 'sailr' and 'sailrREPL' become available.
     + sailrREPL uses fork() internally, which is not available on Windows.
-    + sailrREPL_win uses thread interanally.
-
+    + sailrREPL with '--thread' option switches from fork() to Thread.start(), which works on Windows.
 
 
 ## Grammar of StatSalr
