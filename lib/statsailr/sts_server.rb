@@ -15,15 +15,21 @@ module StatSailr
         writer.close()  # close child's writer
         script = ""
         block_idx = 1
+        @first_time = true
 
-        StatSailr.build_exec( "", initR_beforeExec: true, endR_afterExec: false )  # start R
         puts "Ready to input"
         print "(^0^): "
         while line = reader.gets() do  # !exit is dealt by REPL.
           if line[0] == "!"
             if line =~ /^!exec/ || line =~ /^!!$/
+                ### Execute script ###
                 begin
-                  num_executed = StatSailr.build_exec( script, initR_beforeExec: false, endR_afterExec: false , block_idx_start: block_idx )
+                  if @first_time
+                    num_executed = StatSailr.build_exec( script, initR_beforeExec: true, endR_afterExec: false )  # start R
+                    @first_time = false
+                  else
+                    num_executed = StatSailr.build_exec( script, initR_beforeExec: false, endR_afterExec: false , block_idx_start: block_idx )
+                  end
                 rescue RuntimeError => e
                   print e.backtrace.map.with_index{|elem, idx| idx.to_s + " " + elem }.reverse.join("\n")
                   puts "  \e[1m#{e.message}\e[22m"  # show in bold
@@ -36,8 +42,8 @@ module StatSailr
                     num_executed = 0
                   end
                   block_idx = block_idx + num_executed
-                  script = "" ;  puts()
                 end
+                script = "" ;  puts()
             elsif line =~ /^!clear/
               script = ""
               puts "script is cleared"
