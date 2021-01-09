@@ -11,6 +11,7 @@ module ProcPlot
     setting.runtime_args = {"data" => param("data")}
     setting.store_result = false
     setting.print_opt = false
+    setting.plot_opt = true
   end
 
   def setting_for_box( setting )
@@ -20,6 +21,7 @@ module ProcPlot
     setting.runtime_args = {"data" => param("data")}
     setting.store_result = false
     setting.print_opt = false
+    setting.plot_opt = true
   end
 
   def setting_for_scatter( setting )
@@ -29,6 +31,7 @@ module ProcPlot
     setting.runtime_args = {"data" => param("data")}
     setting.store_result = false
     setting.print_opt = false
+    setting.plot_opt = true
   end
 
 end

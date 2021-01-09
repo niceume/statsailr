@@ -98,7 +98,7 @@ end
 class LazyFuncGeneratorSetting
   include LazyFuncGeneratorSettingUtility
 
-  attr_accessor :libname, :func_name, :main_arg_and_how_to_treat, :runtime_args, :store_result, :print_opt
+  attr_accessor :libname, :func_name, :main_arg_and_how_to_treat, :runtime_args, :store_result, :print_opt, :plot_opt
   def initialize
     @libname = nil
     @func_name = nil
@@ -108,6 +108,7 @@ class LazyFuncGeneratorSetting
 
     @store_result = true
     @print_opt = nil
+    @plot_opt = nil
   end
 
   def create_func_arg_hash( main_arg, opt_args )
@@ -206,6 +207,7 @@ class LazyFuncGenerator
 
     store_result = setting.store_result
     print_opt = setting.print_opt
+    plot_opt = setting.plot_opt
 
     if (! libname.nil?) && libname != "" 
       lib = RBridge.create_library_function( libname )
@@ -214,7 +216,7 @@ class LazyFuncGenerator
 
     lazy_func = RBridge::create_lazy_function( func_name, func_hash, param_manager)
 
-    return [ lazy_func, print_opt, store_result, result_name  ]
+    return [ lazy_func, print_opt, plot_opt, store_result, result_name  ]
   end
 
 end

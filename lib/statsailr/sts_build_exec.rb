@@ -22,6 +22,36 @@ def self.initial_setting_for_r(device_info)
       RBridge.exec_function_no_return(lib_func)
       attach_widget_func = RBridge.create_function_call("asCairoDevice", {"widget" => RBridge.create_extptr(p_widget) } )
       RBridge.exec_function_no_return(attach_widget_func)
+      @new_device_info = { "file_output" => false, "dev_off_required" => false }
+
+    when "cairoraster"  # (e.g.) ["CairoRaster", {"width" => 800, "height" => 600, "dev.copy_opt" => {"dir_path"=> dir_to_save , "prefix"=> "plot", "type" => "png"} }]
+      puts "Use Cairo function in Cairo library"
+      if ! device_info[1].is_a?(Hash)
+        raise "The second element of device info needs to be Hash"
+      end
+      cairo_info = device_info[1]
+      if ! ["png", "jpeg"].include? cairo_info["dev.copy_opt"]["type"]
+        raise "only png or jpeg is supported for type"
+      else
+        case cairo_info["dev.copy_opt"]["type"]
+        when "png"
+          # load png library
+          lib_func = RBridge.create_library_function("png")
+          RBridge.exec_function_no_return(lib_func)
+        when "jpeg"
+          # use default jpeg device
+        end
+      end
+      lib_func = RBridge.create_library_function("Cairo")
+      RBridge.exec_function_no_return(lib_func)
+      new_cairo_device_func = RBridge.create_function_call("Cairo", { "width" => RBridge.create_intvec([ cairo_info["width"] ]),
+                                                                      "height" => RBridge.create_intvec([ cairo_info["height"] ]),
+                                                                      "type" => RBridge.create_strvec([ "raster" ])  })
+      RBridge.exec_function_no_return(new_cairo_device_func)
+      @new_device_info = { "file_output" => true, "dev_off_required" => true ,
+                           "opt" => cairo_info["dev.copy_opt"].merge( {
+                                      "device_func" => RBridge::SymbolR.new( cairo_info["dev.copy_opt"]["type"] ).to_r_symbol,
+                                      "default_width" => cairo_info["width"], "default_height" => cairo_info["height"]})}
     else
       puts "Unknown device type: #{device_type}"
     end
@@ -30,6 +60,11 @@ def self.initial_setting_for_r(device_info)
 end
 
 def self.endR()
+  if ! @new_device_info.nil?
+    if @new_device_info["dev_off_required"]
+      RBridge.exec_function_no_return( RBridge.create_function_call("dev.off", {}))
+    end
+  end
   RBridge.end_embedded_r()
   puts "R program safely finished"
 end
@@ -113,7 +148,7 @@ blocks.each(){|blk|
       when ProcBlock
         result_manager = RBridge::RResultManager.new
         lazy_funcs_with_print_result_opts = ProcBlockToR.create_lazy_funcs( blk , @proc_setting_manager )
-        lazy_funcs_with_print_result_opts.each(){|lazy_func, print_opt, store_result , result_name |
+        lazy_funcs_with_print_result_opts.each(){|lazy_func, print_opt, plot_opt, store_result , result_name |
           puts "Instruction #{result_name}"
           r_obj = RBridge.exec_lazy_function( lazy_func , result_manager , allow_nil_result: true)
           if(store_result)
@@ -130,6 +165,24 @@ blocks.each(){|blk|
             RBridge::exec_function_no_return(print_func)
           else
             raise "print_opt needs to be true, false, String."
+          end
+          if( plot_opt.nil? || plot_opt == false || @new_device_info.nil? )
+            #nop
+          else
+            if @new_device_info["file_output"] == true
+              # The plot needs to be saved on disk.
+              dev_info_opt = @new_device_info["opt"]
+              temp_path = ""
+              temp_file = Tempfile.new( [dev_info_opt["prefix"] , "." + dev_info_opt["type"] ] , dev_info_opt["dir_path"] )
+              temp_path = temp_file.path
+              temp_file.close(true)
+              dev_copy_func = RBridge::create_function_call("dev.copy", { "device" => dev_info_opt["device_func"], "file" => RBridge::create_strvec([temp_path]),
+                                                                          "width" => RBridge::create_intvec( dev_info_opt["default_width"]),
+                                                                          "height" => RBridge::create_intvec( dev_info_opt["default_height"]) })
+              RBridge::exec_function_no_return(dev_copy_func)
+              dev_off_func = RBridge::create_function_call("dev.off", {})
+              RBridge::exec_function_no_return(dev_off_func)
+            end
           end
         }
       end

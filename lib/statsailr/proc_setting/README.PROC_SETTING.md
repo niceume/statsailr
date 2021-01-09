@@ -59,7 +59,11 @@ end
         + If set false, the result is not printed out.
     + String
         + If String value is set, the result is printed out using the name specified.
-
+* setting.plot_opt
+    + true/false
+        + Under the situation where graphics device does not show on display and tries to output to a file, this setting is valid.
+            + If true, StatSailr conducts dev.copy() at the end of this current instruction, and saves graphics device content to file.
+        + If the current graphics device outputs to display, this setting is useless and ignored.
 
 ## More about main_arg_and_how_to_treat
 
