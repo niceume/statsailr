@@ -26,7 +26,11 @@ module StatSailr
       def run(stream)
         raise ArgumentError, 'missing block' unless block_given?
         if capture == false
-          yield
+          begin 
+            yield
+          rescue => e
+            raise e
+          end
         else
           orig_stream = stream.dup
           IO.pipe do |r, w|
