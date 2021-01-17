@@ -1,4 +1,5 @@
 require "r_bridge"
+require "statsailr/sts_output/output_manager"
 
 module StatSailr
 def self.initR()
@@ -78,12 +79,17 @@ def self.change_working_dir( set_working_dir )
 end
 
 
-def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil )
+def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,  output_mngr: Output::OutputManager.new(capture: false))
 
 require_relative("scanner/sts_scanner.rb")
 
-s = STSScanDriver.new( script )
-tokens = s.tokenize()
+output_mngr.move_to_new_node("Tokenize code")
+tokens = []
+output_mngr.add_new_message(:output).run($stdout){
+  s = STSScanDriver.new( script )
+  tokens = s.tokenize()
+}
+output_mngr.move_up()
 
 if tokens.empty?
   puts "Input token is empty"
@@ -99,7 +105,12 @@ end
 
 require_relative("parser/sts_parse.tab.rb")
 
-gram_nodes = STSParserDriver.run( tokens )
+gram_nodes = nil
+output_mngr.move_to_new_node("Parse tokens")
+output_mngr.add_new_message(:output).run($stdout){
+  gram_nodes = STSParserDriver.run( tokens )
+}
+output_mngr.move_up()
 
 require_relative("block_builder/sts_block.rb")
 
@@ -133,39 +144,59 @@ if @proc_setting_manager.nil?
 end
 
 begin
+output_mngr.move_to_new_node("BLOCK_TO_R")
 block_idx = block_idx_start
 blocks.each(){|blk|
   RBridge.ptr_manager_open ("Block No. " + block_idx.to_s) {
     begin
-      puts "BLOCK NO. " + block_idx.to_s
+      block_num_str = "BLOCK NO. " + block_idx.to_s + "\n"
       case blk
       when TopStmt
-        func = TopStmtToR.create_function( blk )
-        RBridge.exec_function_no_return( func ) unless func.nil?
+        output_mngr.move_to_new_node("TopStmt")
+        output_mngr.add_new_message(:text).set_content( block_num_str )
+        output_mngr.add_new_message(:output).run($stdout){
+          func = TopStmtToR.create_function( blk )
+          RBridge.exec_function_no_return( func ) unless func.nil?
+          puts ""
+        }
+        output_mngr.move_up()
       when DataBlock
-        func = DataBlockToR.create_function( blk )
-        RBridge.exec_function_no_return( func )
+        output_mngr.move_to_new_node("DataBlock")
+        output_mngr.add_new_message(:text).set_content( block_num_str )
+        output_mngr.add_new_message(:output).run($stdout){
+          func = DataBlockToR.create_function( blk )
+          RBridge.exec_function_no_return( func )
+          puts ""
+        }
+        output_mngr.move_up()
       when ProcBlock
+        output_mngr.move_to_new_node(["ProcBlock", blk.command ])
+        output_mngr.add_new_message(:text).set_content( block_num_str )
         result_manager = RBridge::RResultManager.new
         lazy_funcs_with_print_result_opts = ProcBlockToR.create_lazy_funcs( blk , @proc_setting_manager )
         lazy_funcs_with_print_result_opts.each(){|lazy_func, print_opt, plot_opt, store_result , result_name |
-          puts "Instruction #{result_name}"
-          r_obj = RBridge.exec_lazy_function( lazy_func , result_manager , allow_nil_result: true)
-          if(store_result)
-            result_manager.add_inst_r_obj( result_name, r_obj)
-          end
-          if(print_opt.nil? || print_opt == false)
-            # nop
-          elsif(print_opt == true )
-            print_func = RBridge::create_function_call("print", { "x" => r_obj } )
-            RBridge::exec_function_no_return(print_func)
-          elsif(print_opt.is_a? String)
-            func_before_print = print_opt
-            print_func = RBridge::create_function_call("print", {"x" => RBridge::create_function_call( func_before_print , { "" => r_obj }) })
-            RBridge::exec_function_no_return(print_func)
-          else
-            raise "print_opt needs to be true, false, String."
-          end
+          output_mngr.move_to_new_node(["inst", result_name])
+          output_mngr.add_new_message(:text).set_content( "inst: #{result_name}\n" )
+          output_mngr.add_new_message(:output).run($stdout){
+            r_obj = RBridge.exec_lazy_function( lazy_func , result_manager , allow_nil_result: true)
+            if(store_result)
+              result_manager.add_inst_r_obj( result_name, r_obj)
+            end
+            if(print_opt.nil? || print_opt == false)
+              # nop
+            elsif(print_opt == true )
+              print_func = RBridge::create_function_call("print", { "x" => r_obj } )
+              RBridge::exec_function_no_return(print_func)
+            elsif(print_opt.is_a? String)
+              func_before_print = print_opt
+              print_func = RBridge::create_function_call("print", {"x" => RBridge::create_function_call( func_before_print , { "" => r_obj }) })
+              RBridge::exec_function_no_return(print_func)
+            else
+              raise "print_opt needs to be true, false, String."
+            end
+          }
+          output_mngr.add_new_message(:new_line).set_content("\n")
+
           if( plot_opt.nil? || plot_opt == false || @new_device_info.nil? )
             #nop
           else
@@ -177,13 +208,17 @@ blocks.each(){|blk|
               temp_path = temp_file.path
               temp_file.close(true)
               dev_copy_func = RBridge::create_function_call("dev.copy", { "device" => dev_info_opt["device_func"], "file" => RBridge::create_strvec([temp_path]),
-                                                                          "width" => RBridge::create_intvec( dev_info_opt["default_width"]),
-                                                                          "height" => RBridge::create_intvec( dev_info_opt["default_height"]) })
+                                                                          "width" => RBridge::create_intvec( [dev_info_opt["default_width"]] ),
+                                                                          "height" => RBridge::create_intvec( [dev_info_opt["default_height"]] ) })
               RBridge::exec_function_no_return(dev_copy_func)
               dev_off_func = RBridge::create_function_call("dev.off", {})
               RBridge::exec_function_no_return(dev_off_func)
+              if(File.exist? temp_path)
+                output_mngr.add_new_message(:plot_file).set_content( temp_path )
+              end
             end
           end
+          output_mngr.move_up()
         }
       end
     rescue => e
@@ -200,10 +235,16 @@ rescue => error
   RBridge.gc_all()
   puts "gc is explicitly executed for this block"
   raise
+ensure
+  output_mngr.move_to_root()
 end
 
 if endR_afterExec
-  endR()
+  output_mngr.move_to_new_node("INIT_R")
+  output_mngr.add_new_message(:output).run($stdout){
+    endR()
+  }
+  output_mngr.move_up()
 end
 
 return ( block_idx - block_idx_start ) # number of blocks processed. 
