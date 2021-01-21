@@ -27,5 +27,6 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "r_bridge" , '~> 0.5', '>= 0.5.0'
+  spec.add_runtime_dependency "r_bridge" , '~> 0.5', '>= 0.5.1'
+  spec.add_runtime_dependency "statsailr_procs_base" , '~> 0.1', '>= 0.1.0'
 end

@@ -79,7 +79,9 @@ def self.change_working_dir( set_working_dir )
 end
 
 
-def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,  output_mngr: Output::OutputManager.new(capture: false))
+def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,
+                     output_mngr: Output::OutputManager.new(capture: false), 
+                     procs_gem: "statsailr_procs_base" )
 
 require_relative("scanner/sts_scanner.rb")
 
@@ -138,10 +140,48 @@ if ! set_working_dir.nil?
   change_working_dir( set_working_dir )
 end
 
-if @proc_setting_manager.nil?
-  @proc_setting_manager = ProcSettingManager.new
-  @proc_setting_manager.add_proc_settings_from_dir( File.expand_path( "proc_setting/" , __dir__ ) )
-end
+output_mngr.move_to_new_node("Load PROCs")
+output_mngr.add_new_message(:output).run($stdout){
+  if @proc_setting_manager.nil?
+    @proc_setting_manager = ProcSettingManager.new
+
+    if procs_gem.nil?
+      puts "No PROC(s) are instructed to be registered. nil specified."
+    elsif ! [String, Array].include? procs_gem.class
+      raise "procs_gem needs to be specified in String or Array."
+    else
+      if procs_gem.class == String
+        procs_gem = [procs_gem]
+      end
+
+      procs_gems_name_class_array = procs_gem.filter_map(){|gem_name| 
+        if gem_name =~ /^statsailr_(\w+)/
+          class_name = $1.split("_").map(){|elem| elem.capitalize()}.join("")
+          [ gem_name, class_name ]
+        else
+          raise 'gem name specified for procs_gem is not appropriate. The name pattern should be /^statsailr_(\w+)/'
+        end
+      }
+
+      puts ("Load gems for PROC settings")
+      procs_gems_name_class_array.each{|procs_gem_name, procs_class_name|
+      # Add PROCs from gems
+        begin
+          require(procs_gem_name)
+          @proc_setting_manager.add_proc_settings_from_dir( Module.const_get( "StatSailr::" + procs_class_name).send( "path_to_proc_setting") )
+          puts "#{procs_gem_name} gem is loaded (ver. #{Gem.loaded_specs[procs_gem_name].version.to_s})"
+        rescue LoadError => e
+          puts e.message
+          puts "#{procs_gem_name} gem failed to be loaded"
+          e.set_backtrace( [] )
+        rescue NameError
+        rescue RuntimeError
+        end
+      }
+    end
+  end
+}
+output_mngr.move_up()
 
 begin
 output_mngr.move_to_new_node("BLOCK_TO_R")

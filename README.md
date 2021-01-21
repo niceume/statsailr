@@ -176,6 +176,15 @@ Briefly speaking,
 
 ### PROC block
 
+#### statsailr_procs_base gem
+
+PROC commands and instructions are now managed in a separate PROCs gem. The gem name is 'statsailr_procs_base' (from ver. 0.71). You need to have the gem installed to use PROCs ,though it is usually installed as a dependency of 'statsailr' gem. If StatSailr complains that PROC PRINT command is not found, please make sure that the PROCs gem is installed.
+
+The PROCs gem holds basic PROC settings, such as PRINT and PLOT, and its main class (StatSailr::ProcsBase) just returns the base path for those PROC settings. Please read the README of the PROCs gem if you are interested in how PROCs are implemented.
+
+
+#### Format
+
 A typical PROC block looks like the follwing. The first line start with PROC, followed by PROC command name and PROC options. The PROC first line is followed by a list of instuctions with their main and optional arguments. The PROC block ends with END keyword.
 
 ```
