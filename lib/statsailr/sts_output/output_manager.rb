@@ -13,9 +13,16 @@ module StatSailr
         @type = type
         @content = content
         @parent = parent
+
+        if capture == false
+          print @content
+        end
       end
 
       def set_content( content )
+        if capture == false
+          print content
+        end
         @content = content
       end
 
