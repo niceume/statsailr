@@ -60,88 +60,7 @@ def self.initial_setting_for_r(device_info)
   RBridge.exec_function_no_return( RBridge.create_function_call("options", {"warn" => RBridge.create_intvec([ 1 ])} ))
 end
 
-def self.endR()
-  if ! @new_device_info.nil?
-    if @new_device_info["dev_off_required"]
-      RBridge.exec_function_no_return( RBridge.create_function_call("dev.off", {}))
-    end
-  end
-  RBridge.end_embedded_r()
-  puts "R program safely finished"
-end
-
-def self.change_working_dir( set_working_dir )
-  unless Dir.exists?(set_working_dir)
-    raise "New working directory not found: #{set_working_dir}"
-  end
-  RBridge.exec_function_no_return( RBridge.create_function_call("setwd", {"dir" => RBridge.create_strvec([set_working_dir])}))
-  puts "R program working directory is set to #{set_working_dir}"
-end
-
-
-def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,
-                     output_mngr: Output::OutputManager.new(capture: false), 
-                     procs_gem: "statsailr_procs_base" )
-
-require_relative("scanner/sts_scanner.rb")
-
-output_mngr.move_to_new_node("Tokenize code")
-tokens = []
-output_mngr.add_new_message(:output).run($stdout){
-  s = STSScanDriver.new( script )
-  tokens = s.tokenize()
-}
-output_mngr.move_up()
-
-if tokens.empty?
-  puts "Input token is empty"
-  if initR_beforeExec
-    initR()
-    initial_setting_for_r( device_info )
-  end
-  if endR_afterExec
-    endR()
-  end
-  return 0
-end
-
-require_relative("parser/sts_parse.tab.rb")
-
-gram_nodes = nil
-output_mngr.move_to_new_node("Parse tokens")
-output_mngr.add_new_message(:output).run($stdout){
-  gram_nodes = STSParserDriver.run( tokens )
-}
-output_mngr.move_up()
-
-require_relative("block_builder/sts_block.rb")
-
-blocks = []
-gram_nodes.each(){|node|
-  case node.type
-  when :TOP_BLOCK
-    blocks << TopStmt.new_from_gram_node(node)
-  when :DATA_BLOCK
-    blocks << DataBlock.new_from_gram_node(node)
-  when :PROC_BLOCK
-    blocks << ProcBlock.new_from_gram_node(node)
-  end
-}
-
-require_relative("block_to_r/sts_block_to_r.rb")
-require_relative("block_to_r/proc_setting_support/proc_setting_manager.rb")
-
-if initR_beforeExec
-  initR()
-  initial_setting_for_r( device_info )
-end
-
-if ! set_working_dir.nil?
-  change_working_dir( set_working_dir )
-end
-
-output_mngr.move_to_new_node("Load PROCs")
-output_mngr.add_new_message(:output).run($stdout){
+def self.initial_procs_registration( procs_gem )
   if @proc_setting_manager.nil?
     @proc_setting_manager = ProcSettingManager.new
 
@@ -180,8 +99,99 @@ output_mngr.add_new_message(:output).run($stdout){
       }
     end
   end
+end
+
+def self.endR()
+  if ! @new_device_info.nil?
+    if @new_device_info["dev_off_required"]
+      RBridge.exec_function_no_return( RBridge.create_function_call("dev.off", {}))
+    end
+  end
+  RBridge.end_embedded_r()
+  puts "R program safely finished"
+end
+
+def self.change_working_dir( set_working_dir )
+  unless Dir.exists?(set_working_dir)
+    raise "New working directory not found: #{set_working_dir}"
+  end
+  RBridge.exec_function_no_return( RBridge.create_function_call("setwd", {"dir" => RBridge.create_strvec([set_working_dir])}))
+  puts "R program working directory is set to #{set_working_dir}"
+end
+
+
+def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,
+                     output_mngr: Output::OutputManager.new(capture: false), 
+                     procs_gem: "statsailr_procs_base" )
+
+require_relative("scanner/sts_scanner.rb")
+
+output_mngr.move_to_new_node("Tokenize code")
+tokens = []
+output_mngr.add_new_message(:output).run($stdout){
+  s = STSScanDriver.new( script )
+  tokens = s.tokenize()
 }
 output_mngr.move_up()
+
+if tokens.empty?
+  puts "Input token is empty"
+  if initR_beforeExec
+    initR()
+    initial_setting_for_r( device_info )
+
+    output_mngr.move_to_new_node("Load PROCs")
+    output_mngr.add_new_message(:output).run($stdout){
+      initial_procs_registration( procs_gem )
+    }
+    output_mngr.move_up()
+  end
+  if endR_afterExec
+    endR()
+  end
+  return 0
+end
+
+require_relative("parser/sts_parse.tab.rb")
+
+gram_nodes = nil
+output_mngr.move_to_new_node("Parse tokens")
+output_mngr.add_new_message(:output).run($stdout){
+  gram_nodes = STSParserDriver.run( tokens )
+}
+output_mngr.move_up()
+
+require_relative("block_builder/sts_block.rb")
+
+blocks = []
+gram_nodes.each(){|node|
+  case node.type
+  when :TOP_BLOCK
+    blocks << TopStmt.new_from_gram_node(node)
+  when :DATA_BLOCK
+    blocks << DataBlock.new_from_gram_node(node)
+  when :PROC_BLOCK
+    blocks << ProcBlock.new_from_gram_node(node)
+  end
+}
+
+require_relative("block_to_r/sts_block_to_r.rb")
+require_relative("block_to_r/proc_setting_support/proc_setting_manager.rb")
+
+if initR_beforeExec
+  initR()
+  initial_setting_for_r( device_info )
+
+  output_mngr.move_to_new_node("Load PROCs")
+  output_mngr.add_new_message(:output).run($stdout){
+    initial_procs_registration( procs_gem )
+  }
+  output_mngr.move_up()
+end
+
+if ! set_working_dir.nil?
+  change_working_dir( set_working_dir )
+end
 
 begin
 output_mngr.move_to_new_node("BLOCK_TO_R")
