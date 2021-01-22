@@ -209,12 +209,11 @@ class LazyFuncGenerator
     print_opt = setting.print_opt
     plot_opt = setting.plot_opt
 
-    if (! libname.nil?) && libname != "" 
-      lib = RBridge.create_library_function( libname )
-      RBridge.exec_function_no_return(lib)
+    if libname.nil? || libname == ""
+      libname = nil
     end
 
-    lazy_func = RBridge::create_lazy_function( func_name, func_hash, param_manager)
+    lazy_func = RBridge::create_ns_lazy_function( libname, func_name, func_hash, param_manager)
 
     return [ lazy_func, print_opt, plot_opt, store_result, result_name  ]
   end
