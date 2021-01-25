@@ -98,9 +98,10 @@ end
 class LazyFuncGeneratorSetting
   include LazyFuncGeneratorSettingUtility
 
-  attr_accessor :libname, :func_name, :main_arg_and_how_to_treat, :runtime_args, :store_result, :print_opt, :plot_opt
+  attr_accessor :libname, :envname, :func_name, :main_arg_and_how_to_treat, :runtime_args, :store_result, :print_opt, :plot_opt
   def initialize
     @libname = nil
+    @envname = nil
     @func_name = nil
 
     @main_arg_and_how_to_treat = nil
@@ -201,6 +202,7 @@ class LazyFuncGenerator
       raise "method for this instruction(#{inst})" "is not defined: " + SETTING_FOR_PREFIX + underscored_inst
     end
     libname = setting.libname 
+    envname = setting.envname
     func_name = setting.func_name
     func_hash = setting.create_func_arg_hash( main_arg, opt_args )
     result_name = inst
@@ -212,8 +214,19 @@ class LazyFuncGenerator
     if libname.nil? || libname == ""
       libname = nil
     end
+    if envname.nil? || libname == ""
+      envname = nil
+    end
 
-    lazy_func = RBridge::create_ns_lazy_function( libname, func_name, func_hash, param_manager)
+    if ! libname.nil?
+      lazy_func = RBridge::create_ns_lazy_function( libname, func_name, func_hash, param_manager)
+    else
+      if ! envname.nil?
+        lazy_func = RBridge::create_env_lazy_function( envname, func_name, func_hash, param_manager)
+      else
+        lazy_func = RBridge::create_lazy_function( func_name, func_hash, param_manager)
+      end
+    end
 
     return [ lazy_func, print_opt, plot_opt, store_result, result_name  ]
   end
