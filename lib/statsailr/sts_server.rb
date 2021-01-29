@@ -45,7 +45,7 @@ module StatSailr
                   end
                   block_idx = block_idx + num_executed
                 end
-                script = "" ;  puts()
+                script = ""
             elsif line =~ /^!clear/
               script = ""
               puts "script is cleared"
