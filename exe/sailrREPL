@@ -2,10 +2,34 @@
 
 ## Parse argumnet and initialize setting
 
-fork_or_thread = "fork"
+require 'optparse'
+opt = OptionParser.new
+params = {}
+new_params = {}
 
-if ARGV.include?("--thread")
-  fork_or_thread = "thread"
+opt.on('--thread')
+opt.on('--procs-gem VAL')
+opt.parse!(ARGV, into: params)
+
+fork_or_thread = params[:thread]
+if fork_or_thread
+  new_params[:fork_or_thread] = "thread"
+else
+  new_params[:fork_or_thread] = "fork"
+end
+
+if params[:"procs-gem"]
+  if params[:"procs-gem"] =~ /[a-zA-Z,_-]+/ 
+    if params[:"procs-gem"].include?( "," )
+      new_params[:"procs_gem"] = params[:"procs-gem"].split(",")
+    else
+      new_params[:"procs_gem"] = params[:"procs-gem"]
+    end
+  else
+    raise "--procs-gem option takes gem name or gem names separated with comma(,)."
+  end
+else
+  # nothing to be specified.
 end
 
 ## Main
@@ -14,7 +38,7 @@ require("statsailr")
 
 reader, writer = IO.pipe
 
-child_service = StatSailr::Service.start( reader , writer, fork_or_thread: fork_or_thread )
+child_service = StatSailr::Service.start( reader , writer, **new_params )
 
 prompt = "(^^)v: "
 line = ""

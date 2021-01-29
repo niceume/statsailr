@@ -1,18 +1,54 @@
 #!/usr/bin/env ruby
 
-raise "Please spcify StatSailr script path" if( ARGV[0].nil? )
+## Parse argumnet and initialize setting
 
-$script_file_path = Dir.pwd + "/" + ARGV[0]
+require('optparse')
+opt = OptionParser.new
+params = {}
+new_params = {}
+
+opt.on('--procs-gem VAL')
+opt.parse!(ARGV, into: params)
+
+if params[:"procs-gem"]
+  if params[:"procs-gem"] =~ /[a-zA-Z,_-]+/ 
+    if params[:"procs-gem"].include?( "," )
+      new_params[:"procs_gem"] = params[:"procs-gem"].split(",")
+    else
+      new_params[:"procs_gem"] = params[:"procs-gem"]
+    end
+  else
+    raise "--procs-gem option takes gem name or gem names separated with comma(,)."
+  end
+else
+  # nothing to be specified.
+end
+
+specified_script_path = ARGV[0]
+
+raise "Please spcify StatSailr script path" if( specified_script_path.nil? )
+
+
+## Set path
+
+require('pathname')
+
+if Pathname.new(specified_script_path).relative?
+  $script_file_path = Dir.pwd + "/" + specified_script_path
+else
+  $script_file_path = specified_script_path
+end
 
 raise "StatSailr script file specified does not exist" if ! File.exist?( $script_file_path )
 
 $script_dir_path = File.dirname( $script_file_path )
 
+
+## Run
+
 require("statsailr")
 
-StatSailr.run()
+StatSailr.run( **new_params )
 
-# In the future, create StatSailr gem & load script file there.
-# Currently, everything exists in the same directory.
-# load( __dir__ + "/" + "sts_build.rb")  # __dir__ = Direcotry of THIS file.
+
 

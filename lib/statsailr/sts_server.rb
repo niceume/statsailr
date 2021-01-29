@@ -2,7 +2,7 @@ require_relative "sts_build_exec.rb"
 
 module StatSailr
   module Service
-    def self.start( reader , writer , fork_or_thread: "fork" )
+    def self.start( reader , writer , fork_or_thread: "fork", **kwparams )
       if $service_started
         puts "StatSailr::Service has already started"
         return false
@@ -27,7 +27,7 @@ module StatSailr
                 ### Execute script ###
                 begin
                   if @first_time
-                    num_executed = StatSailr.build_exec( script, initR_beforeExec: true, endR_afterExec: false )  # start R
+                    num_executed = StatSailr.build_exec( script, initR_beforeExec: true, endR_afterExec: false , **kwparams )  # start R
                     @first_time = false
                   else
                     num_executed = StatSailr.build_exec( script, initR_beforeExec: false, endR_afterExec: false , block_idx_start: block_idx )

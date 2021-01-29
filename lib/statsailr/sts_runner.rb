@@ -1,7 +1,7 @@
 require_relative "sts_build_exec.rb"
 
 module StatSailr
-  def self.run()
+  def self.run( **kw_args )
 
     if FileTest.exist?( $script_file_path )
       script_file = File.open( $script_file_path, "r")
@@ -11,6 +11,7 @@ module StatSailr
       raise( $script_file_path + ":StatSailr source file does not exit")
     end
 
-    StatSailr.build_exec(script, initR_beforeExec: true, endR_afterExec: true, block_idx_start: 1, set_working_dir: File.dirname( $script_file_path ) )
+    StatSailr.build_exec(script, initR_beforeExec: true, endR_afterExec: true, block_idx_start: 1, set_working_dir: File.dirname( $script_file_path ),
+                         **kw_args )
   end
 end
