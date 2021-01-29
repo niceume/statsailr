@@ -1,5 +1,6 @@
 require "r_bridge"
 require "statsailr/sts_output/output_manager"
+require "statsailr/block_to_r/proc_setting_support/proc_setting_manager.rb"
 
 module StatSailr
 def self.initR()
@@ -176,7 +177,6 @@ gram_nodes.each(){|node|
 }
 
 require_relative("block_to_r/sts_block_to_r.rb")
-require_relative("block_to_r/proc_setting_support/proc_setting_manager.rb")
 
 if initR_beforeExec
   initR()

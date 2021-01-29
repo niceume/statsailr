@@ -10,7 +10,7 @@ class StatSailrController
   INITIAL_BLOCK_COUNTER = 1
   @block_counter = INITIAL_BLOCK_COUNTER
 
-  def self.init( working_dir: nil ,  device_info: nil)
+  def self.init( working_dir: nil, device_info: nil, **kwargs )
     if ! device_info.nil?
       # This parameter should be something like ["Gtk3", <FFI::Pointer>]
       raise "device_info parameter needs to be an Array" unless device_info.is_a? Array
@@ -28,7 +28,8 @@ class StatSailrController
     num_executed = 0
     num_executed = StatSailr.build_exec( " ", initR_beforeExec: true, endR_afterExec: false,
                                         block_idx_start: @block_counter, set_working_dir: working_dir, device_info: device_info,
-                                        output_mngr: @output_mngr )
+                                        output_mngr: @output_mngr,
+                                        **kwargs  )
     @block_counter = num_executed + @block_counter
     return @output_mngr.to_s
   end
