@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Toshihiro Umehara"]
   spec.email         = ["toshi@niceume.com"]
 
-  spec.summary       = %q{Provides a platform for statisticians to focus on statistics}
-  spec.description   = %q{}
+  spec.summary       = %q{Provides a platform to focus on statistics}
+  spec.description   = %q{StatSailr is a Ruby program that enables users to manipulate data and to apply statistical procedures in an intuiitive way. Internally, StatSailr converts StatSailr script into R's internal representation via Ruby, and executes it. }
   spec.homepage      = "https://github.com/niceume/statsailr"
   spec.license       = "GPL-3.0"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.3.0")

@@ -1,18 +1,16 @@
 # StatSailr
 
-StatSailr provides a platform for statisticians to focus on statistics. The backend statistics engine is [R](https://www.r-project.org/), so the results are reliable. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. Each block has its way of writing instructions, which works as an intuitive interface for R.
+StatSailr provides a platform for users to focus on statistics. The backend statistics engine is [R](https://www.r-project.org/), so the results are reliable. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. Each block has its way of writing instructions, which works as an intuitive interface for R.
 
 
 ## Overview
 
-StatSailr is a Ruby program that enables statisticians to manipulate data and to apply statistical procedures in an intuiitive way. StatSailr converts StatSailr script into R's internal representation, and executes it. 
-
-TOPLEVEL loads and saves datasets. DATA blocks utilize DataSailr package as its backend, which enables wrting data manipulation insturctions in a rowwise way. PROC blocks have a series of PROC instructions, and they correspond to R functions. It executes those R functions sequentially. These are all based on R functionality.
+StatSailr is a Ruby program that enables users to manipulate data and to apply statistical procedures in an intuiitive way. StatSailr converts StatSailr script into R's internal representation, and executes it. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. TOPLEVEL loads and saves datasets. DATA blocks utilize DataSailr package as its backend, which enables wrting data manipulation insturctions in a rowwise way. PROC blocks have a series of PROC instructions, which are converted to R functions and are executed sequentially.
 
 
 ### Quick Introduction
 
-The following is an example of StatSailr script. It consists of TOPLEVEL LOAD instruction, DATA block and PROC blocks.
+The following is an example of StatSailr script. It consists of TOPLEVEL instruction, DATA block and PROC blocks.
 
 ```
 READ builtin="mtcars"
@@ -29,9 +27,8 @@ PROC PRINT data=new_mtcars
   head 10
 END
 
-PROC GENREG new_mtcars
-  factor powerful cyl gear
-  glm powerful ~ cyl + gear / family = binomial
+PROC REG data=new_mtcars
+  lm hp ~ powerful
 END
 ```
 
@@ -45,29 +42,77 @@ sailr create_new_mtcars.slr
 ```
 
 
-### Demo
+### Commands and options
 
-Not only sailr command, but sailrREPL command is also provided. It enables interactive executaion of StatSailr script. (For non-UNIX system, sailrREPL_win can be used, which is thread based.)
+#### sailr
 
-* Unlike sailr command, sailrREPL requires explicit execution and explicit exit commands.
-    + !! or !exec : Execute StatSailr script inputted.
-    + !exit : Finish StatSailr REPL.
+sailr command executes StatSailr script.
+
+* sailr [filename]
+    + --procs-gem <gemX,gemY,...>
+        + allow users to specify PROCs gems when they need to use other than default PROCs gem, statsailr_procs_base.
+        + To specify multiple gems, separate them with comma(,)
 
 
-[DEMO GIF of sailrREPL]
+#### sailrREPL
 
+Not only sailr command, but sailrREPL command is also provided. It enables interactive executaion of StatSailr script. (For non-UNIX system, sailrREPL --thread can be used, which is thread based.)
+
+* sailrREPL
+    + --procs-gem <gemX,gemY,...>
+        + allow users to specify PROCs gems
+    + --thread
+        + Thread based implementation of REPL. (Windows requires this option.)
+
+
+sailrREPL requires the explicit commands. Lines are stored as input script until the following commands are executed. Commands within REPL start from !.
+
+
++ !! or !exec : Executes StatSailr script input. (and clears the input stored.)
++ !clear : Clears input script.
++ !exit : Finishes StatSailr REPL.
+
+
+The following example shows how sailrREPL works.
+
+```
+cli > sailrREPL  # start REPL
+
+(^^)v: READ builtin=mtcars
+(^^)v: !!  # execute READ
+  ... output ...
+(^^)v: DATA new_mtcars set=mtcars
+(^^)v:   if( hp > 100){
+(^^)v:     powerful = 1
+(^^)v:   }else{
+(^^)v:     powerful = 0
+(^^)v:   }
+(^^)v: END
+(^^)v: !!  # execute DATA block
+  ... output ...
+(^^)v: PROC PRINT data=new_mtcars
+(^^)v:   head 5
+(^^)v: END
+(^^)v: !!  # execute PROC block
+  ... output ...
+(^^)v: !exit  # exit REPL
+
+cli > 
+
+```
 
 ## Installation
 
 ### Requirements
 
 * R (>= 4.0 is preferable)
-    + datasailr package (From R's interpreter, 'install.packages("datasailr")')
+    + datasailr package
+        + From R's interpreter, execute 'install.packages("datasailr")'.
 * Ruby (>= 2.7)
-    + r_bridge gem (From terminal, 'gem install r_bridge')
-* (For source package users)
-    + R's datasailr package and Ruby's r_bridge use C/C++ native extension.
-    + If you install via source package, you need to install build tools such as C compiler/linker and make programs.
+    + r_bridge gem
+        + Configure PATH, LD_LIBRARY_PATH or RUBY_DLL_PATH to access R's shared library (libR.so or R.dll).
+            + Details are mentioned in r_bridge gem's README.
+        + After configuring these settings, install r_bridge gem via 'gem install r_bridge'
 
 
 ### Install StatSailr
@@ -77,8 +122,6 @@ $ gem install statsailr
 ```
 
 * Then, 'sailr' and 'sailrREPL' become available.
-    + sailrREPL uses fork() internally, which is not available on Windows.
-    + sailrREPL with '--thread' option switches from fork() to Thread.start(), which works on Windows.
 
 
 ## Grammar of StatSalr
