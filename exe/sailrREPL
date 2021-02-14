@@ -18,6 +18,14 @@ else
   new_params[:fork_or_thread] = "fork"
 end
 
+if new_params[:fork_or_thread] == "fork"
+  if Process.respond_to?(:fork)
+    # "fork" is used and system has "fork" implementation.
+  else
+    raise 'fork is not implemented on this system. Please try to run sailrREPL with "--thread" option'
+  end
+end
+
 if params[:"procs-gem"]
   if params[:"procs-gem"] =~ /[a-zA-Z,_-]+/ 
     if params[:"procs-gem"].include?( "," )
