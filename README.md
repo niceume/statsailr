@@ -1,16 +1,16 @@
 # StatSailr
 
-StatSailr provides a platform for users to focus on statistics. The backend statistics engine is [R](https://www.r-project.org/), so the results are reliable. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. Each block has its way of writing instructions, which works as an intuitive interface for R.
+StatSailr provides a platform for users to focus on statistics. The backend statistics engine is [R](https://www.r-project.org/), so the results are reliable. The StatSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. Each block has its way of writing instructions, which works as an intuitive interface for R.
 
 
 ## Overview
 
-StatSailr is a Ruby program that enables users to manipulate data and to apply statistical procedures in an intuiitive way. StatSailr converts StatSailr script into R's internal representation, and executes it. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. TOPLEVEL loads and saves datasets. DATA blocks utilize DataSailr package as its backend, which enables wrting data manipulation insturctions in a rowwise way. PROC blocks have a series of PROC instructions, which are converted to R functions and are executed sequentially.
+StatSailr is a Ruby program that enables users to manipulate data and to apply statistical procedures in an intuitive way. StatSailr converts StatSailr script into R's internal representation, and executes it. The SataSailr script consists of three major blocks, TOPLEVEL, DATA, and PROC. TOPLEVEL loads and saves datasets. DATA blocks utilize DataSailr package as its backend, which enables wrting data manipulation instructions in a rowwise way. PROC blocks have a series of PROC instructions, which are converted to R functions and are executed sequentially.
 
 
 ### Quick Introduction
 
-The following is an example of StatSailr script. It consists of TOPLEVEL instruction, DATA block and PROC blocks.
+The following is an example of StatSailr script. It consists of TOPLEVEL, DATA and PROC blocks.
 
 ```
 READ builtin="mtcars"
@@ -30,6 +30,8 @@ END
 PROC REG data=new_mtcars
   lm hp ~ powerful
 END
+
+SAVE new_mtcars file="./new_mtcars.rda" type="rdata"
 ```
 
 Save this script as, say, create_new_mtcars.slr and run.
@@ -124,7 +126,7 @@ $ gem install statsailr
 * Then, 'sailr' and 'sailrREPL' become available.
 
 
-## Grammar of StatSalr
+## Grammar of StatSailr
 
 StatSailr script consists of three parts, TOPLEVEL, DATA block and PROC block.
 
@@ -140,7 +142,7 @@ TOPLEVEL statements import and save datasets, and also StatSailr's current worki
 
 Datasets can come from built-in datasets and files. In R, built-in datasets can be used by data() function, and StatSailr READ with 'builtin=' option does the same job.
 
-When importing datasets from files, currently there are three types of files availble, RDS, RDATA and CSV. RDS contains a single R object, and when you import it, you can neme the object using 'as=' option. If you omit 'as=' option, the name is created based on the filename. RDATA can contain multiple R objects, but their names cannot be changed when importing that are decided when saveing. CSV is a comma separated values file.
+When importing datasets from files, currently there are three types of files available, RDS, RDATA and CSV. RDS contains a single R object, and when you import it, you can name the object using 'as=' option. If you omit 'as=' option, the name is created based on the filename. RDATA can contain multiple R objects, but their names cannot be changed when importing that are decided when saving. CSV is a comma separated values file.
 
 These dataset types are decided as follows. If you specify 'type' option, its type is used. If you do not specify it, it is inferred from the file extension. 
 
@@ -162,7 +164,7 @@ SAVE new_mtcars file="./new_mtcars.csv" type="csv"
 
 * show and change working directory
 
-The concept of working directory is really important. If you run your SailrScript in an unintentional place and ouput some data, those data might overwrite your importan data.
+The concept of working directory is really important. If you run your StatSailr script in an unintentional place and output some data, those data might overwrite your important data.
 
 The default working directory should be the directory where StatSailr script file exists. If you do not specify script file, such as when you run REPL, the default working directory should be the directory where you start your command (such as REPL).
 
@@ -176,7 +178,7 @@ SETWD "~/sailr_workspace"
 
 ### DATA block
 
-DATA block starts with the line of DATA, new dataset name and DATA options. For DATA options, 'set=' option is required which specify the input dataset. (Note that unlinke PROC options where 'data=' usually speifies input dataset, "set=" does the same job in DATA block. This difference comes from just an aesthetic reason.) Lines that follws the first DATA line represent how to manipulate input dataset. The lines are writtein in DataSailr script. END keyword specifies the end of DATA block.
+DATA block starts with the line of DATA, new dataset name and DATA options. For DATA options, 'set=' option is required which specify the input dataset. (Note that unlink PROC options where 'data=' usually specifies input dataset, "set=" does the same job in DATA block. This difference comes from just an aesthetic reason.) Lines that follws the first DATA line represent how to manipulate input dataset. The lines are written in DataSailr script. END keyword specifies the end of DATA block.
 
 ```
 DATA new_dataset set=ori_dataset
@@ -194,24 +196,23 @@ The DataSailr script is described in detail at [its official website](https://da
 
 Briefly speaking, 
 
-1. Rowwise dataset manipulation
-    + Varables correspond to column names.
+1. Row by row dataset processing
+    + Variable names correspond to column names.
 2. Simplified available types
-    + Int, Double and String(=Characters) are basic types, that can be used in DataSailr script and also those values can be assigned to column value (of dataset).
-    + Regular expression and boolean are not assigned to dataset. They can be held by variables, but do not modify dataset.
+    + Int, Double and String are basic types, that can be used in DataSailr script and also those values can be assigned to data sets.
+    + Regular expression and Boolean do not affect dataset.
         + Regular expression is used for if condition and extracting substrings.
         + Boolean is internal type that is used for if condition.
-3. Assignment operator (=) creates new column with the column name same as the variable left-hand-side(LHS) of assignment operator.
+3. Assignment operator (=) creates new column or updates the existing column with the same column name as the variable left-hand-side of assignment operator.
     + If the variable already exits, the column is updated.
-    + Exceptions are assigning regular expressions and boolen, which do not modify dataset. Variables pointing to those objects are only used in the script.
-4. Control flow can be done using if-(else if)-(else) statement.
-    + Condition part needs parentheses (), and statement part require curly braces.
+    + Exceptions are assigning Regular Expressions, which do not modify dataset. This is used to reuse them at different lines of code.
+4. If-else statement is the only control flow statement.
 5. Arithmetic operators
 6. Built-in functions
     + Mainly used to manipulate strings.
-7. Regular expression
+7. Regular Expression
 8. UTF-8
-    + Use UTF-8 for script and dataset. It is highly recommended that dataset should be saved using UTF-8 beforehand.
+    + It is highly recommended t use UTF-8 for script and dataset. Data set needs to be saved in UTF-8 beforehand.
 9. push!() and discard!() built-in functions
     + push!() can create multiple rows from current row.
     + discard!() can filter out specific rows by being used with if statements.
@@ -228,7 +229,7 @@ The PROCs gem holds basic PROC settings, such as PRINT and PLOT, and its main cl
 
 #### Format
 
-A typical PROC block looks like the follwing. The first line start with PROC, followed by PROC command name and PROC options. The PROC first line is followed by a list of instuctions with their main and optional arguments. The PROC block ends with END keyword.
+A typical PROC block looks like the following. The first line start with PROC, followed by PROC command name and PROC options. The PROC first line is followed by a list of instructions with their main and optional arguments. The PROC block ends with END keyword.
 
 ```
 PROC COMMAND proc_opts
@@ -241,7 +242,7 @@ END
 * COMMAND
     + PROC command name
 * proc_opts
-    + This parameter can be refered from any instructions in this block. In other words, this can be seen as global settings of this PROC block.
+    + This parameter can be referred from any instructions in this block. In other words, this can be seen as global settings of this PROC block.
     + Internally, this parameter is managed by RBridge::ParamManager.
 * proc_statement line
     + Each line consists of instruction, main argument and optional arguments. Main argument and optional arguments are separated by slash(/).
