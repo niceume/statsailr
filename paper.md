@@ -1,5 +1,5 @@
 ---
-title: 'StatSailr: Yet Another Interface to GNU R'
+title: 'StatSailr: Reproducible and Easy Statistics Environment with StatSailr Script'
 tags:
   - Ruby
   - R
