@@ -103,6 +103,87 @@ cli >
 
 ```
 
+## Tests
+
+### Build Docker Image
+
+* Place the following two files, Dockerfile and example.slr
+
+
+Dockerfile
+
+```
+FROM ruby:2.7.2-buster
+
+RUN apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+RUN echo "deb http://cloud.r-project.org/bin/linux/debian buster-cran40/" >> /etc/apt/sources.list
+
+ENV R_HOME="/usr/lib/R"
+
+ENV LD_LIBRARY_PATH="${R_HOME}/lib:${LD_LIBRARY_PATH}"
+
+RUN apt-get update -y && apt-get upgrade -y
+
+RUN apt-get install -y build-essential
+
+RUN apt-get install -y -t buster-cran40 r-base r-base-dev
+
+RUN R -e "install.packages('datasailr',dependencies=TRUE, repos='"https://cloud.r-project.org"')"
+
+RUN gem install r_bridge statsailr statsailr_procs_base
+
+ADD ./example.slr /
+```
+
+example.slr
+
+```
+READ builtin=mtcars
+
+PROC PRINT data=mtcars
+  head 5
+END
+
+DATA new_mtcars set=mtcars
+  if( hp > 100 ){
+    powerful = 1
+  }else{
+    powerful = 0
+  }
+END
+
+PROC PRINT data=new_mtcars
+  head 5
+END
+
+PROC CAT data=new_mtcars
+  table cyl powerful
+  fisher.test
+END
+```
+
+* Command to build docker image.
+
+```
+sudo docker build --tag=niceume/statsailr:0.1 .
+```
+
+### Start Docker Image & Run Example
+
+* Run bash within docker image
+
+```
+sudo docker run -it niceume/statsailr:0.1 /bin/bash
+```
+
+* Within docker image, run example.slr.
+
+```
+sailr example.slr
+```
+
+
+
 ## Installation
 
 ### Requirements

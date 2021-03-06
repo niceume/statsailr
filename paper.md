@@ -86,7 +86,7 @@ The statsailr\_procs\_base gem can work as a template when you develop your own 
 
 # Acknowledgements
 
-I would like to thank my family, Yuki, Joichiro and Kaoruko for always giving me joy.
+I would like to thank my children, Joichiro and Kaoruko for always giving me joy.
 
 # References
 
