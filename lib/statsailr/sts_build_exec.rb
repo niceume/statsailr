@@ -3,8 +3,8 @@ require "statsailr/sts_output/output_manager"
 require "statsailr/block_to_r/proc_setting_support/proc_setting_manager.rb"
 
 module StatSailr
-def self.initR()
-  RBridge.init_embedded_r()
+def self.initR( unlimited_cstack )
+  RBridge.init_embedded_r( unlimited_cstack: unlimited_cstack )
   puts "R program initialized"
 end
 
@@ -122,6 +122,7 @@ end
 
 
 def self.build_exec( script , initR_beforeExec: false , endR_afterExec: false , block_idx_start: 1, set_working_dir: nil, device_info: nil,
+                     unlimited_cstack: false,
                      output_mngr: Output::OutputManager.new(capture: false), 
                      procs_gem: "statsailr_procs_base" )
 
@@ -138,7 +139,7 @@ output_mngr.move_up()
 if tokens.empty?
   puts "Input token is empty"
   if initR_beforeExec
-    initR()
+    initR( unlimited_cstack )
     initial_setting_for_r( device_info )
 
     output_mngr.move_to_new_node("Load PROCs")
@@ -179,7 +180,7 @@ gram_nodes.each(){|node|
 require_relative("block_to_r/sts_block_to_r.rb")
 
 if initR_beforeExec
-  initR()
+  initR( unlimited_cstack )
   initial_setting_for_r( device_info )
 
   output_mngr.move_to_new_node("Load PROCs")
