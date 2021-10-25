@@ -43,6 +43,8 @@ def self.initial_setting_for_r(device_info)
           RBridge.exec_function_no_return(lib_func)
         when "jpeg"
           # use default jpeg device
+          lib_func = RBridge.create_library_function("jpeg")
+          RBridge.exec_function_no_return(lib_func)
         end
       end
       lib_func = RBridge.create_library_function("Cairo")
@@ -286,7 +288,8 @@ blocks.each(){|blk|
                   r_func_write_png = RBridge::create_function_call("writePNG", {"image" => r_func_cairo_capture, "target" => r_str_file_path })
                   RBridge::exec_function_no_return( r_func_write_png )
                 elsif file_output_opt["type"] == "jpeg"
-                  # todo: jpeg
+                  r_func_write_jpeg = RBridge::create_function_call("writeJPEG", {"image" => r_func_cairo_capture, "target" => r_str_file_path })
+                  RBridge::exec_function_no_return( r_func_write_jpeg )
                 end
               end
 
