@@ -258,12 +258,20 @@ blocks.each(){|blk|
               temp_file = Tempfile.new( [dev_info_opt["prefix"] , "." + dev_info_opt["type"] ] , dev_info_opt["dir_path"] )
               temp_path = temp_file.path
               temp_file.close(true)
-              dev_copy_func = RBridge::create_function_call("dev.copy", { "device" => dev_info_opt["device_func"], "file" => RBridge::create_strvec([temp_path]),
-                                                                          "width" => RBridge::create_intvec( [dev_info_opt["default_width"]] ),
-                                                                          "height" => RBridge::create_intvec( [dev_info_opt["default_height"]] ) })
-              RBridge::exec_function_no_return(dev_copy_func)
-              dev_off_func = RBridge::create_function_call("dev.off", {})
-              RBridge::exec_function_no_return(dev_off_func)
+
+             if ["png", "jpeg" ].include? dev_info_opt["type"]
+                # writePNG( image=Cairo.capture( device=dev.cur() ), target="./plot.png" )
+                r_func_curr_dev = RBridge::create_function_call("dev.cur", {})
+                r_func_cairo_capture = RBridge::create_function_call("Cairo.capture",{"device" => r_func_curr_dev})
+                r_str_file_path = RBridge::create_strvec([temp_path])
+                if dev_info_opt["type"] == "png"
+                  r_func_write_png = RBridge::create_function_call("writePNG", {"image" => r_func_cairo_capture, "target" => r_str_file_path })
+                  RBridge::exec_function_no_return( r_func_write_png )
+                elsif dev_info_opt["type"] == "jpeg"
+                  # todo: jpeg
+                end
+              end
+
               if(File.exist? temp_path)
                 output_mngr.add_new_message(:plot_file).set_content( temp_path )
               end
