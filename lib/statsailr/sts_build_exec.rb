@@ -26,16 +26,17 @@ def self.initial_setting_for_r(device_info)
       RBridge.exec_function_no_return(attach_widget_func)
       @new_device_info = { "file_output" => false, "dev_off_required" => false }
 
-    when "cairoraster"  # (e.g.) ["CairoRaster", {"width" => 800, "height" => 600, "dev.copy_opt" => {"dir_path"=> dir_to_save , "prefix"=> "plot", "type" => "png"} }]
+    when "cairoraster"  # (e.g.) ["CairoRaster", {"width" => 800, "height" => 600 }, {"file_output_opt" => {"dir_path"=> dir_to_save , "prefix"=> "plot", "type" => "png"} }]
       puts "Use Cairo function in Cairo library"
       if ! device_info[1].is_a?(Hash)
         raise "The second element of device info needs to be Hash"
       end
-      cairo_info = device_info[1]
-      if ! ["png", "jpeg"].include? cairo_info["dev.copy_opt"]["type"]
+      cairo_info = device_info[1].dup
+      file_output_opt = device_info[2]["file_output_opt"]
+      if ! ["png", "jpeg"].include? file_output_opt["type"]
         raise "only png or jpeg is supported for type"
       else
-        case cairo_info["dev.copy_opt"]["type"]
+        case file_output_opt["type"]
         when "png"
           # load png library
           lib_func = RBridge.create_library_function("png")
@@ -46,14 +47,31 @@ def self.initial_setting_for_r(device_info)
       end
       lib_func = RBridge.create_library_function("Cairo")
       RBridge.exec_function_no_return(lib_func)
-      new_cairo_device_func = RBridge.create_function_call("Cairo", { "width" => RBridge.create_intvec([ cairo_info["width"] ]),
-                                                                      "height" => RBridge.create_intvec([ cairo_info["height"] ]),
-                                                                      "type" => RBridge.create_strvec([ "raster" ])  })
-      RBridge.exec_function_no_return(new_cairo_device_func)
-      @new_device_info = { "file_output" => true, "dev_off_required" => true ,
-                           "opt" => cairo_info["dev.copy_opt"].merge( {
-                                      "device_func" => RBridge::SymbolR.new( cairo_info["dev.copy_opt"]["type"] ).to_r_symbol,
-                                      "default_width" => cairo_info["width"], "default_height" => cairo_info["height"]})}
+
+      @new_device_info = { "file_output" => true, "dev_off_required" => true ,"file_output_opt" => file_output_opt,
+                           "dev_control" => {
+                             "new" => lambda {
+                               RBridge.exec_function_no_return(
+                               RBridge.create_function_call("Cairo",
+                                 { "width" => RBridge.create_intvec([ cairo_info["width"] ]),
+                                   "height" => RBridge.create_intvec([ cairo_info["height"] ]),
+                                   "type" => RBridge.create_strvec([ "raster" ])  }))
+                             },
+                             "off" => lambda {
+                               RBridge.exec_function_no_return(
+                               RBridge.create_function_call("dev.off", {}))
+                             },
+                             "get_size" => lambda {
+                               {:width => cairo_info["width"], :height => cairo_info["height"]}
+                             },
+                             "set_size" => lambda {|width, height|
+                               cairo_info["width"] = width
+                               cairo_info["height"] = height
+                             }
+                           }
+                         }
+      @new_device_info["dev_control"]["new"].call()
+
     else
       puts "Unknown device type: #{device_type}"
     end
@@ -253,24 +271,27 @@ blocks.each(){|blk|
           else
             if @new_device_info["file_output"] == true
               # The plot needs to be saved on disk.
-              dev_info_opt = @new_device_info["opt"]
+              file_output_opt = @new_device_info["file_output_opt"]
               temp_path = ""
-              temp_file = Tempfile.new( [dev_info_opt["prefix"] , "." + dev_info_opt["type"] ] , dev_info_opt["dir_path"] )
+              temp_file = Tempfile.new( [file_output_opt["prefix"] , "." + file_output_opt["type"] ] , file_output_opt["dir_path"] )
               temp_path = temp_file.path
               temp_file.close(true)
 
-             if ["png", "jpeg" ].include? dev_info_opt["type"]
+              if ["png", "jpeg" ].include? file_output_opt["type"]
                 # writePNG( image=Cairo.capture( device=dev.cur() ), target="./plot.png" )
                 r_func_curr_dev = RBridge::create_function_call("dev.cur", {})
                 r_func_cairo_capture = RBridge::create_function_call("Cairo.capture",{"device" => r_func_curr_dev})
                 r_str_file_path = RBridge::create_strvec([temp_path])
-                if dev_info_opt["type"] == "png"
+                if file_output_opt["type"] == "png"
                   r_func_write_png = RBridge::create_function_call("writePNG", {"image" => r_func_cairo_capture, "target" => r_str_file_path })
                   RBridge::exec_function_no_return( r_func_write_png )
-                elsif dev_info_opt["type"] == "jpeg"
+                elsif file_output_opt["type"] == "jpeg"
                   # todo: jpeg
                 end
               end
+
+              @new_device_info["dev_control"]["off"].call()
+              @new_device_info["dev_control"]["new"].call()
 
               if(File.exist? temp_path)
                 output_mngr.add_new_message(:plot_file).set_content( temp_path )
