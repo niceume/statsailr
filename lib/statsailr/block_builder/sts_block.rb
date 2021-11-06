@@ -137,8 +137,14 @@ class ProcBlock
           idx = 0
           while idx < proc_stmt_arg_ori.size() do
             elem = proc_stmt_arg_ori[idx]
-            if( elem.type == :sign && elem.e1 == "/" )
-              break
+            next_elem = proc_stmt_arg_ori[idx + 1]
+            next_next_elem = proc_stmt_arg_ori[idx + 2]
+            if(elem.type == :sign && elem.e1 == "/" ) then
+               if( ! next_elem.nil? && next_elem.type == :ident &&   # After /, optional arguments start
+                   ! next_next_elem.nil? && next_next_elem.type == :sign && next_next_elem.e1 == "=") ||
+                   next_elem.nil? then  # After /, there is nothing
+                 break
+               end
             else
               x = type_adjust( elem.e1, elem.type )
               proc_stmt_arg << x

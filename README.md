@@ -254,7 +254,7 @@ END
             + How main argument part is parsed varies on each instruction. This is defined in main_arg_and_how_to_treat variable in setting.
         + opt_args
             + Optional arguments. Values specified in opt_args are also passed to R function's argument.
-            + opt_args part consists of (a) key-value(s) or key(s).
+            + opt_args part consists of (a) key-value(s).
             + Internally, this argument parsing is conducted by methods in STSBlockParseProcOpts.
 
 

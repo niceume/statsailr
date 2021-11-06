@@ -1,6 +1,6 @@
 class STSParser
 
-token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_MULT P_PLUS P_MINUS P_HAT P_IN P_PERC P_TILDA P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA SEP_SLASH 
+token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_MULT P_PLUS P_MINUS P_HAT P_IN P_PERC P_TILDA P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA P_SLASH
 
 rule
 
@@ -77,7 +77,7 @@ proc_primary : IDENT   { result = GramNode.new(:ident , val[0]) }
              | P_LSQBR  { result = GramNode.new(:sign, val[0]) }
              | P_RSQBR  { result = GramNode.new(:sign, val[0]) }
              | P_COMMA  { result = GramNode.new(:sign, val[0]) }
-             | SEP_SLASH { result = GramNode.new(:sign, val[0]) }
+             | P_SLASH { result = GramNode.new(:sign, val[0]) }
 
 opt_termins : # empty 
             | termins

@@ -50,7 +50,6 @@ class STSBlockParseProcOpts
 # arg_opt  : IDENT = primary
 #          | IDENT = array
 #          | IDENT = func 
-#          | IDENT
 #
 # parimary : STRING
 #          | NUM
@@ -95,7 +94,7 @@ class STSBlockParseProcOpts
         raise "the token should be :ident or primaries such as :ident, :num and :string after = . Current token: " + current_token().type.to_s
       end
     else
-      opt_value = true
+      raise "proc instruction optional argumeents should be in the form of a sequence of 'key = value'"
     end
     @result_hash[opt_key.to_s] = opt_value
   end

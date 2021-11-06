@@ -279,7 +279,7 @@ class STSScanner
         @scanner.unscan
         break
       when scan(/\//)  # slash to start options
-        tokens << [:SEP_SLASH, matched]
+        tokens << [:P_SLASH, matched]
       else
         scan(/.*\n/)
         raise "Current PROC line cannot be tokenized." + matched

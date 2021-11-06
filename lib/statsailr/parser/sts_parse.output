@@ -56,7 +56,7 @@ rule 50 proc_primary: P_RPAR
 rule 51 proc_primary: P_LSQBR
 rule 52 proc_primary: P_RSQBR
 rule 53 proc_primary: P_COMMA
-rule 54 proc_primary: SEP_SLASH
+rule 54 proc_primary: P_SLASH
 rule 55 opt_termins: 
 rule 56 opt_termins: termins
 rule 57 termins: termins TERMIN
@@ -171,7 +171,7 @@ rule 58 termins: TERMIN
   P_LSQBR (27) 51
   P_RSQBR (28) 52
   P_COMMA (29) 53
-  SEP_SLASH (30) 54
+  P_SLASH (30) 54
 
 --------- State ---------
 
@@ -611,7 +611,7 @@ state 49
   P_LSQBR       shift, and go to state 69
   P_RSQBR       shift, and go to state 70
   P_COMMA       shift, and go to state 71
-  SEP_SLASH     shift, and go to state 72
+  P_SLASH       shift, and go to state 72
   $default      reduce using rule 33 (optional_proc_stmt_options)
 
   optional_proc_stmt_options  go to state 52
@@ -664,7 +664,7 @@ state 53
   P_LSQBR       shift, and go to state 69
   P_RSQBR       shift, and go to state 70
   P_COMMA       shift, and go to state 71
-  SEP_SLASH     shift, and go to state 72
+  P_SLASH       shift, and go to state 72
   $default      reduce using rule 34 (optional_proc_stmt_options)
 
   proc_primary  go to state 76
@@ -797,7 +797,7 @@ state 71
 
 state 72
 
-  54) proc_primary : SEP_SLASH _
+  54) proc_primary : P_SLASH _
 
   $default      reduce using rule 54 (proc_primary)
 
