@@ -7,7 +7,7 @@
 require 'racc/parser.rb'
 class STSParser < Racc::Parser
 
-module_eval(<<'...end sts_parse.ry/module_eval...', 'sts_parse.ry', 91)
+module_eval(<<'...end sts_parse.ry/module_eval...', 'sts_parse.ry', 101)
 
 def parse( tokens )
   @tokens = tokens
@@ -30,19 +30,23 @@ end
 ##### State transition tables begin ###
 
 racc_action_table = [
-    55,    49,    74,    56,    57,    58,    59,    60,    61,    62,
+    55,    49,    84,    56,    57,    58,    59,    60,    61,    62,
     63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+    73,    74,    75,    76,    77,    78,    79,    80,    81,    82,
     55,     4,     5,    56,    57,    58,    59,    60,    61,    62,
     63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+    73,    74,    75,    76,    77,    78,    79,    80,    81,    82,
     29,    11,    11,    12,    12,    14,    13,    13,    22,    15,
     22,    23,    24,    23,    24,    41,    17,    26,    23,    24,
     27,    31,    32,    33,    39,    39,    44,    39,    31,    46,
-    39,    49,    50,    51,    73 ]
+    39,    49,    50,    51,    83 ]
 
 racc_action_check = [
     49,    51,    51,    49,    49,    49,    49,    49,    49,    49,
     49,    49,    49,    49,    49,    49,    49,    49,    49,    49,
+    49,    49,    49,    49,    49,    49,    49,    49,    49,    49,
     53,     0,     1,    53,    53,    53,    53,    53,    53,    53,
+    53,    53,    53,    53,    53,    53,    53,    53,    53,    53,
     53,    53,    53,    53,    53,    53,    53,    53,    53,    53,
     18,     2,    17,     2,    17,     3,     2,    17,    18,     5,
     11,    18,    18,    11,    11,    31,     6,    12,    31,    31,
@@ -50,29 +54,31 @@ racc_action_check = [
     43,    44,    46,    47,    50 ]
 
 racc_action_pointer = [
-    11,    22,    39,    35,   nil,    49,    46,   nil,   nil,   nil,
-   nil,    39,    44,    49,   nil,   nil,   nil,    40,    37,   nil,
-   nil,   nil,    49,   nil,   nil,    51,    52,    53,   nil,   nil,
-   nil,    44,    54,   nil,    56,    56,   nil,   nil,   nil,    56,
-   nil,   nil,    59,    59,    63,   nil,    67,    63,   nil,   -11,
-    68,    -7,   nil,     9,   nil,   nil,   nil,   nil,   nil,   nil,
+    21,    32,    59,    55,   nil,    69,    66,   nil,   nil,   nil,
+   nil,    59,    64,    69,   nil,   nil,   nil,    60,    57,   nil,
+   nil,   nil,    69,   nil,   nil,    71,    72,    73,   nil,   nil,
+   nil,    64,    74,   nil,    76,    76,   nil,   nil,   nil,    76,
+   nil,   nil,    79,    79,    83,   nil,    87,    83,   nil,   -11,
+    88,    -7,   nil,    19,   nil,   nil,   nil,   nil,   nil,   nil,
+   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,   nil,
    nil,   nil,   nil,   nil,   nil,   nil,   nil ]
 
 racc_action_default = [
-   -55,   -59,   -59,   -56,   -58,   -59,   -55,    -3,    -4,    -5,
-    -6,   -10,   -15,   -59,   -57,    77,    -1,   -58,   -59,   -11,
-   -13,   -14,   -29,   -27,   -28,   -59,   -59,   -19,    -2,    -7,
-   -12,   -59,   -17,   -16,   -59,   -20,   -22,   -23,   -24,   -25,
-   -26,   -29,   -59,   -18,   -59,   -21,   -59,   -59,   -31,   -33,
-   -59,   -59,   -32,   -34,   -36,   -37,   -38,   -39,   -40,   -41,
+   -65,   -69,   -69,   -66,   -68,   -69,   -65,    -3,    -4,    -5,
+    -6,   -10,   -15,   -69,   -67,    87,    -1,   -68,   -69,   -11,
+   -13,   -14,   -29,   -27,   -28,   -69,   -69,   -19,    -2,    -7,
+   -12,   -69,   -17,   -16,   -69,   -20,   -22,   -23,   -24,   -25,
+   -26,   -29,   -69,   -18,   -69,   -21,   -69,   -69,   -31,   -33,
+   -69,   -69,   -32,   -34,   -36,   -37,   -38,   -39,   -40,   -41,
    -42,   -43,   -44,   -45,   -46,   -47,   -48,   -49,   -50,   -51,
-   -52,   -53,   -54,    -8,    -9,   -30,   -35 ]
+   -52,   -53,   -54,   -55,   -56,   -57,   -58,   -59,   -60,   -61,
+   -62,   -63,   -64,    -8,    -9,   -30,   -35 ]
 
 racc_goto_table = [
      7,    45,     2,    19,    21,    48,     1,     6,    16,    45,
-    30,    21,    75,    35,    18,    28,    54,    25,    43,    42,
-    76,    34,    47,    40,    52,    53 ]
+    30,    21,    85,    35,    18,    28,    54,    25,    43,    42,
+    86,    34,    47,    40,    52,    53 ]
 
 racc_goto_check = [
      4,    17,     2,    13,    15,    19,     1,     3,     2,    17,
@@ -91,68 +97,78 @@ racc_goto_default = [
 
 racc_reduce_table = [
   0, 0, :racc_error,
-  3, 32, :_reduce_1,
-  3, 34, :_reduce_2,
-  1, 34, :_reduce_3,
-  1, 35, :_reduce_4,
-  1, 35, :_reduce_5,
-  1, 35, :_reduce_6,
-  3, 36, :_reduce_7,
-  7, 37, :_reduce_8,
-  7, 38, :_reduce_9,
-  0, 39, :_reduce_10,
-  1, 39, :_reduce_11,
-  2, 39, :_reduce_12,
-  1, 44, :_reduce_13,
-  1, 44, :_reduce_14,
-  0, 40, :_reduce_15,
-  2, 40, :_reduce_16,
-  0, 41, :_reduce_17,
-  1, 41, :_reduce_18,
-  0, 42, :_reduce_19,
-  1, 42, :_reduce_20,
-  2, 47, :_reduce_21,
-  1, 47, :_reduce_22,
-  1, 48, :_reduce_23,
-  1, 48, :_reduce_24,
-  1, 49, :_reduce_25,
-  3, 46, :_reduce_26,
-  1, 45, :_reduce_27,
-  1, 45, :_reduce_28,
-  1, 45, :_reduce_29,
-  3, 43, :_reduce_30,
-  1, 43, :_reduce_31,
-  2, 50, :_reduce_32,
-  0, 51, :_reduce_33,
-  1, 51, :_reduce_34,
-  2, 52, :_reduce_35,
-  1, 52, :_reduce_36,
-  1, 53, :_reduce_37,
-  1, 53, :_reduce_38,
-  1, 53, :_reduce_39,
-  1, 53, :_reduce_40,
-  1, 53, :_reduce_41,
-  1, 53, :_reduce_42,
-  1, 53, :_reduce_43,
-  1, 53, :_reduce_44,
-  1, 53, :_reduce_45,
-  1, 53, :_reduce_46,
-  1, 53, :_reduce_47,
-  1, 53, :_reduce_48,
-  1, 53, :_reduce_49,
-  1, 53, :_reduce_50,
-  1, 53, :_reduce_51,
-  1, 53, :_reduce_52,
-  1, 53, :_reduce_53,
-  1, 53, :_reduce_54,
-  0, 33, :_reduce_none,
-  1, 33, :_reduce_none,
-  2, 54, :_reduce_none,
-  1, 54, :_reduce_none ]
+  3, 42, :_reduce_1,
+  3, 44, :_reduce_2,
+  1, 44, :_reduce_3,
+  1, 45, :_reduce_4,
+  1, 45, :_reduce_5,
+  1, 45, :_reduce_6,
+  3, 46, :_reduce_7,
+  7, 47, :_reduce_8,
+  7, 48, :_reduce_9,
+  0, 49, :_reduce_10,
+  1, 49, :_reduce_11,
+  2, 49, :_reduce_12,
+  1, 54, :_reduce_13,
+  1, 54, :_reduce_14,
+  0, 50, :_reduce_15,
+  2, 50, :_reduce_16,
+  0, 51, :_reduce_17,
+  1, 51, :_reduce_18,
+  0, 52, :_reduce_19,
+  1, 52, :_reduce_20,
+  2, 57, :_reduce_21,
+  1, 57, :_reduce_22,
+  1, 58, :_reduce_23,
+  1, 58, :_reduce_24,
+  1, 59, :_reduce_25,
+  3, 56, :_reduce_26,
+  1, 55, :_reduce_27,
+  1, 55, :_reduce_28,
+  1, 55, :_reduce_29,
+  3, 53, :_reduce_30,
+  1, 53, :_reduce_31,
+  2, 60, :_reduce_32,
+  0, 61, :_reduce_33,
+  1, 61, :_reduce_34,
+  2, 62, :_reduce_35,
+  1, 62, :_reduce_36,
+  1, 63, :_reduce_37,
+  1, 63, :_reduce_38,
+  1, 63, :_reduce_39,
+  1, 63, :_reduce_40,
+  1, 63, :_reduce_41,
+  1, 63, :_reduce_42,
+  1, 63, :_reduce_43,
+  1, 63, :_reduce_44,
+  1, 63, :_reduce_45,
+  1, 63, :_reduce_46,
+  1, 63, :_reduce_47,
+  1, 63, :_reduce_48,
+  1, 63, :_reduce_49,
+  1, 63, :_reduce_50,
+  1, 63, :_reduce_51,
+  1, 63, :_reduce_52,
+  1, 63, :_reduce_53,
+  1, 63, :_reduce_54,
+  1, 63, :_reduce_55,
+  1, 63, :_reduce_56,
+  1, 63, :_reduce_57,
+  1, 63, :_reduce_58,
+  1, 63, :_reduce_59,
+  1, 63, :_reduce_60,
+  1, 63, :_reduce_61,
+  1, 63, :_reduce_62,
+  1, 63, :_reduce_63,
+  1, 63, :_reduce_64,
+  0, 43, :_reduce_none,
+  1, 43, :_reduce_none,
+  2, 64, :_reduce_none,
+  1, 64, :_reduce_none ]
 
-racc_reduce_n = 59
+racc_reduce_n = 69
 
-racc_shift_n = 77
+racc_shift_n = 87
 
 racc_token_table = {
   false => 0,
@@ -172,22 +188,32 @@ racc_token_table = {
   :NUMBER => 14,
   :STRING => 15,
   :P_EQ => 16,
-  :P_MULT => 17,
-  :P_PLUS => 18,
-  :P_MINUS => 19,
-  :P_HAT => 20,
-  :P_IN => 21,
-  :P_PERC => 22,
-  :P_TILDA => 23,
-  :P_COLON => 24,
-  :P_LPAR => 25,
-  :P_RPAR => 26,
-  :P_LSQBR => 27,
-  :P_RSQBR => 28,
-  :P_COMMA => 29,
-  :P_SLASH => 30 }
+  :P_DEQ => 17,
+  :P_MULT => 18,
+  :P_PLUS => 19,
+  :P_MINUS => 20,
+  :P_INTDEV => 21,
+  :P_MOD => 22,
+  :P_IN => 23,
+  :P_AND => 24,
+  :P_OR => 25,
+  :P_DAND => 26,
+  :P_DOR => 27,
+  :P_LT => 28,
+  :P_ST => 29,
+  :P_LTE => 30,
+  :P_STE => 31,
+  :P_HAT => 32,
+  :P_TILDE => 33,
+  :P_COLON => 34,
+  :P_LPAR => 35,
+  :P_RPAR => 36,
+  :P_LSQBR => 37,
+  :P_RSQBR => 38,
+  :P_COMMA => 39,
+  :P_SLASH => 40 }
 
-racc_nt_base = 31
+racc_nt_base = 41
 
 racc_use_result_var = true
 
@@ -225,13 +251,23 @@ Racc_token_to_s_table = [
   "NUMBER",
   "STRING",
   "P_EQ",
+  "P_DEQ",
   "P_MULT",
   "P_PLUS",
   "P_MINUS",
-  "P_HAT",
+  "P_INTDEV",
+  "P_MOD",
   "P_IN",
-  "P_PERC",
-  "P_TILDA",
+  "P_AND",
+  "P_OR",
+  "P_DAND",
+  "P_DOR",
+  "P_LT",
+  "P_ST",
+  "P_LTE",
+  "P_STE",
+  "P_HAT",
+  "P_TILDE",
   "P_COLON",
   "P_LPAR",
   "P_RPAR",
@@ -648,13 +684,83 @@ module_eval(<<'.,.,', 'sts_parse.ry', 79)
   end
 .,.,
 
-# reduce 55 omitted
+module_eval(<<'.,.,', 'sts_parse.ry', 80)
+  def _reduce_55(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
 
-# reduce 56 omitted
+module_eval(<<'.,.,', 'sts_parse.ry', 81)
+  def _reduce_56(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
 
-# reduce 57 omitted
+module_eval(<<'.,.,', 'sts_parse.ry', 82)
+  def _reduce_57(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
 
-# reduce 58 omitted
+module_eval(<<'.,.,', 'sts_parse.ry', 83)
+  def _reduce_58(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 84)
+  def _reduce_59(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 85)
+  def _reduce_60(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 86)
+  def _reduce_61(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 87)
+  def _reduce_62(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 88)
+  def _reduce_63(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+module_eval(<<'.,.,', 'sts_parse.ry', 89)
+  def _reduce_64(val, _values, result)
+     result = GramNode.new(:sign, val[0])
+    result
+  end
+.,.,
+
+# reduce 65 omitted
+
+# reduce 66 omitted
+
+# reduce 67 omitted
+
+# reduce 68 omitted
 
 def _reduce_none(val, _values, result)
   val[0]

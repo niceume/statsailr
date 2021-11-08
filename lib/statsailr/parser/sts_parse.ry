@@ -1,6 +1,6 @@
 class STSParser
 
-token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_MULT P_PLUS P_MINUS P_HAT P_IN P_PERC P_TILDA P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA P_SLASH
+token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_DEQ P_MULT P_PLUS P_MINUS P_INTDEV P_MOD P_IN P_AND P_OR P_DAND P_DOR P_LT P_ST P_LTE P_STE P_HAT P_TILDE P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA P_SLASH
 
 rule
 
@@ -64,13 +64,23 @@ proc_primary : IDENT   { result = GramNode.new(:ident , val[0]) }
              | NUMBER  { result = GramNode.new(:num   , val[0]) }
              | STRING  { result = GramNode.new(:string, val[0]) }
              | P_EQ    { result = GramNode.new(:sign, val[0]) }
+             | P_DEQ    { result = GramNode.new(:sign, val[0]) }
              | P_MULT  { result = GramNode.new(:sign, val[0]) }
              | P_PLUS  { result = GramNode.new(:sign, val[0]) }
              | P_MINUS { result = GramNode.new(:sign, val[0]) }
-             | P_HAT   { result = GramNode.new(:sign, val[0]) }
+             | P_INTDEV  { result = GramNode.new(:sign, val[0]) }
+             | P_MOD  { result = GramNode.new(:sign, val[0]) }
              | P_IN    { result = GramNode.new(:sign, val[0]) }
-             | P_PERC  { result = GramNode.new(:sign, val[0]) }
-             | P_TILDA { result = GramNode.new(:sign, val[0]) }
+             | P_AND    { result = GramNode.new(:sign, val[0]) }
+             | P_OR  { result = GramNode.new(:sign, val[0]) }
+             | P_DAND    { result = GramNode.new(:sign, val[0]) }
+             | P_DOR  { result = GramNode.new(:sign, val[0]) }
+             | P_LT { result = GramNode.new(:sign, val[0]) }
+             | P_ST { result = GramNode.new(:sign, val[0]) }
+             | P_LTE { result = GramNode.new(:sign, val[0]) }
+             | P_STE { result = GramNode.new(:sign, val[0]) }
+             | P_HAT   { result = GramNode.new(:sign, val[0]) }
+             | P_TILDE { result = GramNode.new(:sign, val[0]) }
              | P_COLON { result = GramNode.new(:sign, val[0]) }
              | P_LPAR  { result = GramNode.new(:sign, val[0]) }
              | P_RPAR  { result = GramNode.new(:sign, val[0]) }

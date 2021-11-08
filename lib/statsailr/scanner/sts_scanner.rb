@@ -221,6 +221,8 @@ class STSScanner
 
   def scan_proc_special()
     case
+    when scan(/\=\=/)
+       return :P_DEQ
     when scan(/\=/)
       return :P_EQ
     when scan(/\*/)
@@ -229,14 +231,32 @@ class STSScanner
       return :P_PLUS
     when scan(/\-/)
       return :P_MINUS
-    when scan(/\^/)
-      return :P_HAT
+    when scan(/%%/)
+      return :P_INTDEV
+    when scan(/%\/%/)
+      return :P_MOD
     when scan(/\%in\%/)
       return :P_IN
-    when scan(/\%in\%/)
-      return :P_PERC
+    when scan(/&&/)
+      return :P_DAND
+    when scan(/\|\|/)
+      return :P_DOR
+    when scan(/&/)
+      return :P_AND
+    when scan(/\|/)
+      return :P_OR
+    when scan(/>/)
+      return :P_LT
+    when scan(/</)
+      return :P_ST
+    when scan(/>=/)
+      return :P_LTE
+    when scan(/<=/)
+      return :P_STE
+    when scan(/\^/)
+      return :P_HAT
     when scan(/\~/)
-      return :P_TILDA
+      return :P_TILDE
     when scan(/\:/)
       return :P_COLON
     when scan(/\(/)
