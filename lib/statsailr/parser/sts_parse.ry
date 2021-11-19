@@ -1,6 +1,6 @@
 class STSParser
 
-token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER STRING P_EQ P_DEQ P_MULT P_PLUS P_MINUS P_INTDEV P_MOD P_IN P_AND P_OR P_DAND P_DOR P_LT P_ST P_LTE P_STE P_HAT P_TILDE P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA P_SLASH
+token TOP_INST TOP_INST_END DATA_START DATA_SCRIPT DATA_END PROC_START PROC_INST PROC_END TERMIN IDENT ASSIGN COLON NUMBER SQ_STRING DQ_STRING P_EQ P_DEQ P_MULT P_PLUS P_MINUS P_INTDEV P_MOD P_IN P_AND P_OR P_DAND P_DOR P_LT P_ST P_LTE P_STE P_HAT P_TILDE P_COLON P_LPAR P_RPAR P_LSQBR P_RSQBR P_COMMA P_SLASH
 
 rule
 
@@ -46,7 +46,8 @@ key: IDENT  { result = GramNode.new(:option, val[0], true ) }
 kv : IDENT ASSIGN opt_primary  { result = GramNode.new(:option, val[0], val[2]) }
 
 opt_primary : NUMBER  { result = GramNode.new(:num   , val[0]) }
-            | STRING  { result = GramNode.new(:string, val[0]) }
+            | SQ_STRING  { result = GramNode.new(:sq_string, val[0]) }
+            | DQ_STRING  { result = GramNode.new(:dq_string, val[0]) }
             | IDENT   { result = GramNode.new(:ident , val[0]) }
 
 proc_stmts : proc_stmts TERMIN proc_stmt { val[0] << val[2]; result = val[0] }
@@ -62,7 +63,8 @@ proc_stmt_options : proc_stmt_options proc_primary  { val[0] << val[1] ; result 
 
 proc_primary : IDENT   { result = GramNode.new(:ident , val[0]) }
              | NUMBER  { result = GramNode.new(:num   , val[0]) }
-             | STRING  { result = GramNode.new(:string, val[0]) }
+             | SQ_STRING  { result = GramNode.new(:sq_string, val[0]) }
+             | DQ_STRING  { result = GramNode.new(:dq_string, val[0]) }
              | P_EQ    { result = GramNode.new(:sign, val[0]) }
              | P_DEQ    { result = GramNode.new(:sign, val[0]) }
              | P_MULT  { result = GramNode.new(:sign, val[0]) }

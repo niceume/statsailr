@@ -86,12 +86,12 @@ class STSBlockParseProcOpts
         else
           opt_value = ident() # According to BNF, this should be parimary(). However, ident() is more direct and makes sense here.
         end
-      elsif [:string, :num].include? peek.type
+      elsif [:dq_string, :sq_string, :num].include? peek.type
          next_token()
          opt_value = primary()
       else
         p current_token()
-        raise "the token should be :ident or primaries such as :ident, :num and :string after = . Current token: " + current_token().type.to_s
+        raise "the token should be :ident or primaries such as :ident, :num and :string after = . Next token: " + peek.type.to_s
       end
     else
       raise "proc instruction optional argumeents should be in the form of a sequence of 'key = value'"
@@ -126,12 +126,14 @@ class STSBlockParseProcOpts
     case current_token.type
     when :ident
       return ident()
-    when :string
+    when :dq_string
+      return string()
+    when :sq_string
       return string()
     when :num
       return num()
     else
-      raise "the current token should be :ident, :string or :num."
+      raise "the current token should be :ident, :dq_string, :sq_string or :num."
     end
   end
 
@@ -154,8 +156,13 @@ class STSBlockParseProcOpts
   end
 
   def string()
-    raise "the current token should be string" if current_token.type != :string 
-    return type_adjust( current_token.e1, :string)
+    if (current_token.type != :dq_string)
+      return type_adjust( current_token.e1, :dq_string)
+    elsif (current_token.type != :sq_string)
+      return type_adjust( current_token.e1, :sq_string)
+    else
+      raise "the current token should be string (:dq_string or :sq_string)"
+    end
   end
 
   def num()

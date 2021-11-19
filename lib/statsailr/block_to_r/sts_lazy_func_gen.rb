@@ -40,6 +40,50 @@ module LazyFuncGeneratorSettingUtility
     return RBridge.create_strvec( ary.map(){|elem| elem.to_s } )
   end
 
+  def read_symbols_or_functions_as_strvec(ary)
+    deapth_ary = Array.new( ary.size )
+    idx = 0
+    last_idx = ary.size - 1
+    deapth = 0
+    while( idx <= last_idx )
+      if( ary[idx].is_a?(RBridge::SymbolR) && (ary[idx + 1].is_a?(RBridge::SignR) && ary[idx + 1].to_s == "("))
+        # function starts
+        deapth_ary[idx] = deapth
+        deapth = deapth + 1
+        idx = idx + 1
+        deapth_ary[idx] = deapth
+      elsif( ary[idx].is_a?(RBridge::SignR) && ary[idx].to_s == "(")
+        # parenthesis starts
+        deapth = deapth + 1
+        deapth_ary[idx] = deapth
+      elsif( ary[idx].is_a?(RBridge::SignR) && ary[idx].to_s == ")")
+        # parenthesis ends or function ends
+        deapth_ary[idx] = deapth
+        deapth = deapth - 1
+      else
+        deapth_ary[idx] = deapth
+      end
+      idx = idx + 1
+    end
+
+    result_ary = []
+    ary.zip( deapth_ary).each(){|elem, deapth|
+      if elem.respond_to? :to_s_for_r_parsing
+        elem_str = elem.to_s_for_r_parsing
+      else
+        elem_str = elem.to_s
+      end
+
+      if( deapth == 0)
+        result_ary.push( elem_str )
+      else
+        result_ary.last << " " << elem_str
+      end
+    }
+
+    return RBridge.create_strvec( result_ary )
+  end
+
   def result( name , *addl )
     if addl.empty?
       return RBridge::RResultName.new(name)

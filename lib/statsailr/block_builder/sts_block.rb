@@ -1,8 +1,82 @@
 require "r_bridge"
 require_relative "./sts_block_parse_proc_opts.rb"
 
+module QuotedStringSupport
+  def interpret_escape_sequences(str)
+    # This deals with escape sequences in double quoted string literals
+    # The behavior should be same as libsailr (or datasailr)
+    new_str = ""
+    str_array = str.split(//)
+    idx = 0
+    while( idx < str_array.size) do
+      c = str_array[idx]
+      if(c == "\\")
+        idx = idx + 1
+        c = str_array[idx]
+        raise "Tokenizer error: double quoted string literal should never end with \\" if idx >= str_array.size
+        case c
+        when 't'
+          new_str << "\t"
+        when 'n'
+          new_str << "\n"
+        when 'r'
+          new_str << "\r"
+        when "\\"
+          new_str << "\\"
+        when "\'"
+          new_str << "\'"
+        when "\""
+          new_str << "\""
+        when '?'
+          new_str << '?'
+        else
+          new_str << c
+        end
+      else
+        new_str << c
+      end
+      idx = idx + 1
+    end
+    return new_str
+  end
+
+  def escape_backslashes(str)
+    str.gsub("\\", "\\\\")
+  end
+end
+
 module BlockSupport
-  def type_adjust(obj , type)
+  include QuotedStringSupport
+  class QuotedStringR
+    include QuotedStringSupport
+    def initialize(str, quote_type)
+      raise ":dq or :sq should be specified for quote_type" unless [:dq, :sq].include? quote_type
+      @ori_str = str
+      @quote_type = quote_type
+    end
+
+    def to_s
+      to_s_for_r_bridge
+    end
+
+    def to_s_for_r_bridge
+      if @quote_type == :dq
+        interpret_escape_sequences( @ori_str )
+      elsif
+        @ori_str
+      end
+    end
+
+    def to_s_for_r_parsing
+      if @quote_type == :dq
+        %q{"} + @ori_str + %q{"}
+      elsif @quote_type == :sq
+        %q{'} + escape_backslashes( @ori_str ) + %q{'}
+      end
+    end
+  end
+
+  def type_adjust(obj , type , *opts)
     case type
     when :ident
       if obj.is_a?(String)
@@ -19,6 +93,28 @@ module BlockSupport
     when :string
       if obj.is_a?(String)
         result = obj
+      else
+        raise "GramNode with inconsistent type(#{type.to_s}) and object(#{obj.class})"
+      end
+    when :sq_string
+      if obj.is_a?(String)
+        unless opts.include?( :retain_input_string )
+          # default behavior
+          result = obj
+        else
+          result = QuotedStringR.new( obj, :sq )
+        end
+      else
+        raise "GramNode with inconsistent type(#{type.to_s}) and object(#{obj.class})"
+      end
+    when :dq_string
+      if obj.is_a?(String)
+        unless opts.include?( :retain_input_string )
+          # default behavior
+          result = interpret_escape_sequences( obj )
+        else
+          result = QuotedStringR.new( obj, :dq )
+        end
       else
         raise "GramNode with inconsistent type(#{type.to_s}) and object(#{obj.class})"
       end
@@ -146,7 +242,7 @@ class ProcBlock
                  break
                end
             else
-              x = type_adjust( elem.e1, elem.type )
+              x = type_adjust( elem.e1, elem.type, :retain_input_string )
               proc_stmt_arg << x
               idx = idx + 1
             end

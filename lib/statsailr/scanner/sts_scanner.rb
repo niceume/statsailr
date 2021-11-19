@@ -9,49 +9,8 @@ SQ_STR_PATTERN = /'(\\'|[^'\n])*'/
 DQ_STR_PATTERN = /"(\\"|[^"\n])*"/
 end
 
-module STSScannerSupport
-  def interpret_escape_sequences(str)
-    # This deals with escape sequences in double quoted string literals
-    # The behavior should be same as libsailr (or datasailr)
-    new_str = ""
-    str_array = str.split(//)
-    idx = 0
-    while( idx < str_array.size) do
-      c = str_array[idx]
-      if(c == "\\")
-        idx = idx + 1
-        c = str_array[idx]
-        raise "Tokenizer error: double quoted string literal should never end with \\" if idx >= str_array.size
-        case c
-        when 't'
-          new_str << "\t"
-        when 'n'
-          new_str << "\n"
-        when 'r'
-          new_str << "\r"
-        when "\\"
-          new_str << "\\"
-        when "\'"
-          new_str << "\'"
-        when "\""
-          new_str << "\""
-        when '?'
-          new_str << '?'
-        else
-          new_str << c
-        end
-      else
-        new_str << c
-      end
-      idx = idx + 1
-    end
-    return new_str
-  end
-end
-
 class STSScanner
   include ::STSConstants
-  include ::STSScannerSupport
 
   # Initialization & Terminating methods
 
@@ -151,9 +110,9 @@ class STSScanner
       when scan(INT_PATTERN)
         tokens << [:NUMBER, matched.to_i ]
       when scan(SQ_STR_PATTERN)
-        tokens << [:STRING, matched[Range.new(1, -2)] ]
+        tokens << [:SQ_STRING, matched[Range.new(1, -2)] ]
       when scan(DQ_STR_PATTERN)
-        tokens << [:STRING, interpret_escape_sequences(matched[Range.new(1, -2)]) ]
+        tokens << [:DQ_STRING, matched[Range.new(1, -2)] ]
       when scan(/[ \t]/)
         #ignore
       else
@@ -285,9 +244,9 @@ class STSScanner
       when scan(INT_PATTERN)
         tokens << [:NUMBER, matched.to_i ]
       when scan(SQ_STR_PATTERN)
-        tokens << [:STRING, matched[Range.new(1, -2)] ]
+        tokens << [:SQ_STRING, matched[Range.new(1, -2)] ]
       when scan(DQ_STR_PATTERN)
-        tokens << [:STRING, interpret_escape_sequences(matched[Range.new(1, -2)]) ]
+        tokens << [:DQ_STRING, matched[Range.new(1, -2)] ]
       when type = scan_proc_special()
         tokens << [ type , matched ]
       when scan(/[ \t]/)  # Separators
