@@ -1,10 +1,12 @@
 require "pathname"
 require_relative("./proc_opt_validator.rb")
+require_relative("./proc_block_finalizer.rb")
 
 module ProcSettingModule
   def self.included base
     base.extend ClassMethods
     base.instance_variable_set(:@validator, ProcOptValidator.new())
+    base.instance_variable_set(:@finalizer, ProcBlockFinalizer.new())
     base.send :include, InstanceMethods
   end
 
@@ -12,6 +14,8 @@ module ProcSettingModule
     def extend_object( extender )
       extender.instance_variable_set(:@validator, @validator)
       extender.singleton_class.__send__( :attr_accessor, :validator)
+      extender.instance_variable_set(:@finalizer, @finalizer)
+      extender.singleton_class.__send__( :attr_accessor, :finalizer)
       super
     end
 
@@ -35,6 +39,14 @@ module ProcSettingModule
 
     def validator
       @validator
+    end
+
+    def finalizer_enabled
+      @finalizer.enabled = true
+    end
+
+    def finalizer
+      @finalizer
     end
   end
 

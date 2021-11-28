@@ -69,6 +69,8 @@ require_relative("proc_setting_support/proc_setting_module.rb")
 
 module ProcBlockToR
   include BlockToRSupport
+  FINALIZER_NAME = "finalizer"
+
   def self.create_lazy_funcs( blk , proc_setting_manager )
     proc_command = blk.command
     param_manager = RBridge::RParamManager.new( blk.opts )
@@ -90,6 +92,13 @@ module ProcBlockToR
     proc_lazy_funcs_with_print_result_opts = proc_stmts.map(){|proc_stmt|
       lzf_gen.gen_lazy_func( proc_command, proc_stmt, param_manager )
     }
+
+    finalizer = lzf_gen.finalizer
+    if finalizer.enabled?
+      finalizer_func = lzf_gen.gen_lazy_func( proc_command , [ FINALIZER_NAME, "", nil] , param_manager )
+      proc_lazy_funcs_with_print_result_opts.push( finalizer_func )
+    end
+
     return proc_lazy_funcs_with_print_result_opts
   end
 end
