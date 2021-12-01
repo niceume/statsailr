@@ -103,6 +103,10 @@ module LazyFuncGeneratorSettingUtility
     return RBridge::RResultPrevious.new( default_obj )
   end
 
+  def previous_inst_name()
+    return RBridge::RInstPrevious.new()
+  end
+
   def r_obj( val )
     return RBridge.convert_to_r_object( val )
   end
