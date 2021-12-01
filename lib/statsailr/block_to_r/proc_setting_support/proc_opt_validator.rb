@@ -18,7 +18,7 @@ class ProcOptValidator
             raise "#{opt_name} is required for this PROC option"
           end
         end
-        if ! validator["is_a"].nil?
+        if ! param_manager.param_hash[opt_name].nil? && ! validator["is_a"].nil?
           if validator["is_a"].is_a?(Array)
             if ! validator["is_a"].include? class_name_in_param_manager
               raise "#{opt_name} needs to be one of #{validator["is_a"].join("|")}, but #{class_name_in_param_manager} is assigned"
@@ -30,7 +30,7 @@ class ProcOptValidator
           end
 
         end
-        if ! validator["as"].nil?
+        if ! param_manager.param_hash[opt_name].nil? && ! validator["as"].nil?
           if validator["as"] != class_name_in_param_manager
             case validator["as"]
             when "SymbolR"
