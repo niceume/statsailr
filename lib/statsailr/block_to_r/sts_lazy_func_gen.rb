@@ -84,6 +84,88 @@ module LazyFuncGeneratorSettingUtility
     return RBridge.create_strvec( result_ary )
   end
 
+  def read_named_args_as_named_strvec(ary)
+    arg_num_ary = Array.new( ary.size )
+    deapth_ary = Array.new( ary.size )
+    idx = 0
+    last_idx = ary.size - 1
+    arg_num = nil
+    deapth = nil
+
+    while( idx <= last_idx )
+      if( idx == 0 )
+        # name starts
+        unless ( deapth.nil? && ary[idx].is_a?(RBridge::SymbolR) && (ary[idx + 1].is_a?(RBridge::SignR) && ary[idx + 1].to_s == "="))
+          raise "read_named_args_as_named_strvec requires an argument to start with name=expr"
+        end
+        arg_num = 0
+        deapth = 0
+      elsif( deapth == 0 && ary[idx].is_a?(RBridge::SymbolR) && (ary[idx + 1].is_a?(RBridge::SignR) && ary[idx + 1].to_s == "="))
+        # name starts
+        arg_num = arg_num + 1
+      elsif( ary[idx].is_a?(RBridge::SymbolR) && (ary[idx + 1].is_a?(RBridge::SignR) && ary[idx + 1].to_s == "("))
+        # function starts
+        deapth_ary[idx] = deapth
+        arg_num_ary[idx] = arg_num
+        deapth = deapth + 1
+        idx = idx + 1
+        deapth_ary[idx] = deapth
+      elsif( ary[idx].is_a?(RBridge::SignR) && ary[idx].to_s == "(")
+        # parenthesis starts
+        deapth = deapth + 1
+        deapth_ary[idx] = deapth
+      elsif( ary[idx].is_a?(RBridge::SignR) && ary[idx].to_s == ")")
+        # parenthesis ends or function ends
+        deapth_ary[idx] = deapth
+        deapth = deapth - 1
+      else
+        deapth_ary[idx] = deapth
+      end
+      arg_num_ary[idx] = arg_num
+      idx = idx + 1
+    end
+
+    result_ary = []
+    name_ary = []
+    prev_arg_num = -1
+    idx = 0
+    elem_arg_num_ary = ary.zip( arg_num_ary )
+    while( idx < elem_arg_num_ary.size )
+      elem = ary[idx]
+      arg_num = arg_num_ary[idx]
+      if elem.respond_to? :to_s_for_r_parsing
+        elem_str = elem.to_s_for_r_parsing
+      else
+        elem_str = elem.to_s
+      end
+
+      if( arg_num != prev_arg_num ) # starts new 'name=expr'
+        name_ary.push elem_str
+        idx = idx + 1
+        if( ary[idx].to_s != "=" )
+          raise "An argument should be in the form of 'name=expr'"
+        end
+      else
+        if( result_ary[arg_num].nil? )
+          unless result_ary.size == arg_num
+            raise "arg_num is not an appropriate number."
+          end
+          result_ary[arg_num] = [elem_str]
+        else
+          result_ary[arg_num].push( elem_str )
+        end
+      end
+      idx = idx + 1
+      prev_arg_num = arg_num
+    end
+
+    result_vec = RBridge.create_strvec( result_ary.map(){|ary| ary.join(" ") } )
+    name_vec = RBridge.create_strvec( name_ary )
+    add_name_func = RBridge.create_ns_function_call("stats", "setNames", {"object" => result_vec, "nm" => name_vec })
+    result_name_vec = RBridge.exec_function( add_name_func )
+    return result_name_vec
+  end
+
   def result( name , *addl )
     if addl.empty?
       return RBridge::RResultName.new(name)
